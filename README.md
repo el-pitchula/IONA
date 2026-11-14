@@ -83,29 +83,3 @@ Potential statistical methods include:
 | Frontend | React, TypeScript |
 | Visualization | Plotly, Interactive Maps |
 | Version Control | Git, GitHub |
-
-## Repository Structure
-
-```text
-IONA/
-├── data/
-│   ├── raw/
-│   ├── processed/
-│   └── metadata/
-├── analysis/
-│   ├── download_data.py
-│   ├── preprocessing.py
-│   ├── trend_analysis.py
-│   ├── spatial_analysis.py
-│   ├── earth_mind.py
-│   └── validation.py
-├── public/
-│   └── data/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── visualizations/
-├── docs/
-│   ├── methodology.md
-│   └── data_sources.md
-└── README.md
