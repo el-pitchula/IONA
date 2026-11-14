@@ -1,0 +1,41 @@
+{
+    "project": "IONA",
+    "dataset": "GPM IMERG Monthly Final Run",
+    "product": "GPM_3IMERGM",
+    "version": "V07B",
+    "doi": "10.5067/GPM/IMERG/3B-MONTH/07",
+    "period": {
+        "start": "2001-01",
+        "end": "2024-12",
+        "months": 288
+    },
+    "region": {
+        "west": -48.5,
+        "south": -16.5,
+        "east": -46.0,
+        "north": -14.0,
+        "description": "Pilot rectangular region around Distrito Federal and surroundings"
+    },
+    "variable": "monthly_precipitation",
+    "units": "mm/month",
+    "dimensions": {
+        "time": 288,
+        "longitude": 25,
+        "latitude": 25
+    },
+    "valid_values": 180000,
+    "total_values": 180000,
+    "missing_percentage": 0.0,
+    "statistics": {
+        "minimum": 0.0,
+        "maximum": 555.0240383148193,
+        "mean": 111.450212036233,
+        "median": 75.6000030040741,
+        "standard_deviation": 112.80982106787589
+    },
+    "files": {
+        "cube": "data\\processed\\precipitation_cube.npy",
+        "coordinates": "data\\processed\\coordinates.npz",
+        "time_index": "data\\processed\\time_index.csv"
+    }
+}
