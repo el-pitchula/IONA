@@ -42,6 +42,12 @@ def save_figure(fig, filename):
 
 def grid_edges(values):
     values = np.asarray(values, dtype=float)
+
+    if len(values) < 2:
+        raise ValueError(
+            "At least two coordinate values are required."
+        )
+
     midpoints = (values[:-1] + values[1:]) / 2
 
     first = values[0] - (midpoints[0] - values[0])
@@ -52,6 +58,19 @@ def grid_edges(values):
 
 def load_spatial_grid(path, column):
     df = pd.read_csv(path)
+
+    required_columns = {
+        "latitude",
+        "longitude",
+        column
+    }
+
+    missing_columns = required_columns - set(df.columns)
+
+    if missing_columns:
+        raise ValueError(
+            f"Missing columns in {path.name}: {missing_columns}"
+        )
 
     grid = (
         df.pivot(
@@ -69,6 +88,39 @@ def load_spatial_grid(path, column):
         )
 
     return grid
+
+
+def convert_categories_to_numeric(grid, category_codes, label):
+    """
+    Converts categorical spatial grids into numeric arrays.
+
+    Explicit mapping avoids pandas object-dtype arrays,
+    which cannot be passed directly to pcolormesh.
+    """
+
+    numeric_grid = grid.apply(
+        lambda column: column.map(category_codes)
+    )
+
+    if numeric_grid.isna().any().any():
+        unknown_mask = numeric_grid.isna()
+
+        unknown_values = pd.unique(
+            grid[unknown_mask].values.ravel()
+        )
+
+        unknown_values = [
+            value
+            for value in unknown_values
+            if pd.notna(value)
+        ]
+
+        raise ValueError(
+            f"Unknown categories found in {label}: "
+            f"{unknown_values}"
+        )
+
+    return numeric_grid.to_numpy(dtype=float)
 
 
 def spatial_axes(ax, lon, lat):
@@ -195,7 +247,7 @@ lat = trend_grid.index.to_numpy(dtype=float)
 lon_edges = grid_edges(lon)
 lat_edges = grid_edges(lat)
 
-values = trend_grid.to_numpy()
+values = trend_grid.to_numpy(dtype=float)
 
 fig, ax = plt.subplots(figsize=(10, 8))
 
@@ -210,6 +262,7 @@ mesh = ax.pcolormesh(
 )
 
 colorbar = fig.colorbar(mesh, ax=ax, shrink=0.85)
+
 colorbar.set_label(
     "Sen's slope (mm/year of annual precipitation per year)"
 )
@@ -249,7 +302,27 @@ category_codes = {
     for index, category in enumerate(categories)
 }
 
-lisa_values = lisa_grid.replace(category_codes).to_numpy()
+# Explicit categorical-to-numeric conversion.
+# This prevents the object dtype error in pcolormesh.
+
+lisa_values = convert_categories_to_numeric(
+    lisa_grid,
+    category_codes,
+    "LISA"
+)
+
+# Check that the LISA grid matches the trend grid.
+
+if not lisa_grid.index.equals(trend_grid.index):
+    raise ValueError(
+        "LISA and trend latitude grids differ."
+    )
+
+if not lisa_grid.columns.equals(trend_grid.columns):
+    raise ValueError(
+        "LISA and trend longitude grids differ."
+    )
+
 
 lisa_cmap = ListedColormap([
     "#D9D9D9",  # Not significant
@@ -312,6 +385,24 @@ comparison_path = (
 
 comparison = pd.read_csv(comparison_path)
 
+required_comparison_columns = {
+    "latitude",
+    "longitude",
+    "queen_cluster",
+    "rook_cluster"
+}
+
+missing_comparison_columns = (
+    required_comparison_columns - set(comparison.columns)
+)
+
+if missing_comparison_columns:
+    raise ValueError(
+        "Missing columns in comparison file: "
+        f"{missing_comparison_columns}"
+    )
+
+
 queen_grid = (
     comparison.pivot(
         index="latitude",
@@ -332,14 +423,47 @@ rook_grid = (
     .sort_index(axis=1)
 )
 
+# Ensure Queen and Rook have identical spatial grids.
+
 if not queen_grid.index.equals(rook_grid.index):
-    raise ValueError("Queen and Rook latitude grids differ.")
+    raise ValueError(
+        "Queen and Rook latitude grids differ."
+    )
 
 if not queen_grid.columns.equals(rook_grid.columns):
-    raise ValueError("Queen and Rook longitude grids differ.")
+    raise ValueError(
+        "Queen and Rook longitude grids differ."
+    )
 
-queen_values = queen_grid.replace(category_codes).to_numpy()
-rook_values = rook_grid.replace(category_codes).to_numpy()
+if not queen_grid.index.equals(trend_grid.index):
+    raise ValueError(
+        "Comparison and trend latitude grids differ."
+    )
+
+if not queen_grid.columns.equals(trend_grid.columns):
+    raise ValueError(
+        "Comparison and trend longitude grids differ."
+    )
+
+
+# Explicit conversion for both categorical grids.
+
+queen_values = convert_categories_to_numeric(
+    queen_grid,
+    category_codes,
+    "Queen"
+)
+
+rook_values = convert_categories_to_numeric(
+    rook_grid,
+    category_codes,
+    "Rook"
+)
+
+
+# ============================================================
+# PLOT: QUEEN VS ROOK
+# ============================================================
 
 fig, axes = plt.subplots(
     1, 2,
@@ -363,6 +487,7 @@ for ax, values, title in [
 
     ax.set_title(title)
     spatial_axes(ax, lon, lat)
+
 
 colorbar = fig.colorbar(
     mesh,
@@ -403,7 +528,17 @@ print("=" * 60)
 print("Output directory:", OUTPUT)
 print("\nGenerated figures:")
 
-for filename in sorted(OUTPUT.glob("*.png")):
+generated_figures = sorted(OUTPUT.glob("*.png"))
+
+for filename in generated_figures:
     print("-", filename.name)
 
-print("\nTotal figures:", len(list(OUTPUT.glob("*.png"))))
+print("\nTotal figures:", len(generated_figures))
+
+if len(generated_figures) != 5:
+    print(
+        "\nWARNING: Expected 5 figures, "
+        f"but found {len(generated_figures)}."
+    )
+else:
+    print("\nAll five scientific figures were generated successfully.")
