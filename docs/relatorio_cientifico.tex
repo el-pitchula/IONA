@@ -1,0 +1,913 @@
+
+\documentclass[12pt,a4paper]{article}
+
+% ============================================================
+% PACOTES
+% ============================================================
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+\usepackage{lmodern}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{longtable}
+
+\geometry{
+    left=2.5cm,
+    right=2.5cm,
+    top=2.5cm,
+    bottom=2.5cm
+}
+
+\onehalfspacing
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue,
+    citecolor=blue
+}
+
+% ============================================================
+% DOCUMENTO
+% ============================================================
+
+\begin{document}
+
+\begin{titlepage}
+    \centering
+
+    \vspace*{2cm}
+
+    {\Huge\bfseries IONA\par}
+
+    \vspace{0.5cm}
+
+    {\Large Earth Intelligence \& Pattern Discovery\par}
+
+    \vspace{1.5cm}
+
+    {\LARGE\bfseries Revealing What the Averages Hide\par}
+
+    \vspace{2cm}
+
+    {\Large Relatório Técnico-Científico\par}
+
+    \vspace{1cm}
+
+    {\large Análise espaço-temporal da precipitação na
+    região-piloto do Cerrado brasileiro\par}
+
+    \vfill
+
+    {\large NASA Space Apps Challenge 2026\par}
+
+    \vspace{0.5cm}
+
+    {\large 14 de novembro de 2026\par}
+
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+% ============================================================
+\section{Resumo}
+% ============================================================
+
+O IONA (Earth Intelligence \& Pattern Discovery) é uma
+plataforma de análise e descoberta de padrões ambientais
+que investiga estruturas espaço-temporais que podem não
+ser evidentes em estatísticas regionais agregadas.
+
+Este estudo investiga a seguinte questão:
+
+\begin{quote}
+\textbf{A precipitação média do Cerrado brasileiro oculta
+tendências regionais divergentes?}
+\end{quote}
+
+Como estudo-piloto, foi selecionada uma área retangular
+nas proximidades do Distrito Federal e regiões adjacentes.
+Foram utilizados dados mensais do produto NASA GPM IMERG
+Monthly Final Run, versão 07, abrangendo janeiro de 2001
+a dezembro de 2024.
+
+A série foi convertida de taxa média de precipitação para
+acumulação mensal, permitindo a construção de um conjunto
+espaço-temporal com 288 meses e 625 células espaciais.
+
+A análise incluiu estimativas de tendência de Sen,
+teste de Mann--Kendall, correção de múltiplas comparações
+por Benjamini--Hochberg, diagnóstico de autocorrelação,
+Moran Global e Moran Local (LISA).
+
+Os resultados indicaram forte autocorrelação espacial
+nas estimativas de tendência. Entretanto, não foram
+identificadas tendências temporais estatisticamente
+significativas após a correção FDR nas células analisadas.
+A análise LISA revelou agrupamentos espaciais de
+magnitudes relativamente altas e baixas, mas sua
+delimitação apresentou sensibilidade à matriz de
+vizinhança utilizada.
+
+O estudo demonstra a importância de investigar a
+distribuição espacial dos fenômenos ambientais, sem
+confundir organização espacial das estimativas com
+significância estatística de tendências temporais.
+
+% ============================================================
+\section{Pergunta de pesquisa e objetivos}
+% ============================================================
+
+\subsection{Pergunta de pesquisa}
+
+A precipitação média regional oculta diferenças
+espaciais nas magnitudes e direções das tendências
+temporais de precipitação?
+
+\subsection{Objetivo geral}
+
+Investigar padrões espaço-temporais de precipitação
+em uma região-piloto do Cerrado brasileiro utilizando
+dados de sensoriamento remoto e métodos estatísticos
+espaciais.
+
+\subsection{Objetivos específicos}
+
+\begin{itemize}
+    \item Construir uma série mensal de precipitação
+    a partir dos dados NASA GPM IMERG.
+    \item Caracterizar a sazonalidade e a variabilidade
+    interanual da precipitação.
+    \item Estimar tendências temporais regionais e locais.
+    \item Investigar autocorrelação espacial nas
+    estimativas de tendência.
+    \item Identificar agrupamentos espaciais de
+    magnitudes semelhantes.
+    \item Avaliar a sensibilidade dos resultados à
+    definição de vizinhança espacial.
+\end{itemize}
+
+% ============================================================
+\section{Área de estudo}
+% ============================================================
+
+A área de estudo corresponde a um retângulo geográfico
+utilizado como região-piloto, delimitado pelas seguintes
+coordenadas:
+
+\begin{itemize}
+    \item Longitude oeste: $-48.5^\circ$
+    \item Longitude leste: $-46.0^\circ$
+    \item Latitude sul: $-16.5^\circ$
+    \item Latitude norte: $-14.0^\circ$
+\end{itemize}
+
+A grade espacial possui resolução de aproximadamente
+$0.1^\circ$, resultando em 25 posições de longitude e
+25 posições de latitude, totalizando 625 células.
+
+\textbf{Delimitação importante:} esse retângulo é uma
+área-piloto de análise e não representa o polígono
+oficial completo do bioma Cerrado. Portanto, os
+resultados não devem ser generalizados automaticamente
+para todo o bioma.
+
+% ============================================================
+\section{Fonte e características dos dados}
+% ============================================================
+
+\subsection{NASA GPM IMERG}
+
+Foi utilizado o produto:
+
+\begin{itemize}
+    \item Missão: Global Precipitation Measurement (GPM).
+    \item Produto: Integrated Multi-satellitE Retrievals
+    for GPM (IMERG).
+    \item Produto mensal: 3IMERGM.
+    \item Versão: V07 / V07B.
+    \item Identificador: \texttt{GPM\_3IMERGM}.
+    \item Período: janeiro de 2001 a dezembro de 2024.
+    \item Frequência: mensal.
+    \item Resolução espacial: aproximadamente $0.1^\circ$.
+\end{itemize}
+
+Identificador DOI:
+
+\begin{center}
+\url{https://doi.org/10.5067/GPM/IMERG/3B-MONTH/07}
+\end{center}
+
+Página oficial do produto:
+
+\begin{center}
+\url{https://disc.gsfc.nasa.gov/datasets/GPM_3IMERGM_07/summary}
+\end{center}
+
+\subsection{Conversão da variável}
+
+O produto mensal fornece a taxa média de precipitação
+ao longo do mês, em milímetros por hora (mm/hr).
+
+Para obter a acumulação mensal em milímetros, foi
+utilizada a conversão:
+
+\begin{equation}
+P_m = R_m \times 24 \times D_m
+\end{equation}
+
+em que:
+
+\begin{itemize}
+    \item $P_m$ é a precipitação acumulada no mês,
+    em mm/mês;
+    \item $R_m$ é a taxa média de precipitação,
+    em mm/hr;
+    \item $D_m$ é o número de dias do mês.
+\end{itemize}
+
+A duração real de cada mês foi considerada,
+incluindo anos bissextos.
+
+Os valores de preenchimento (\textit{fill values})
+foram convertidos para valores ausentes (NaN).
+
+\subsection{Validação}
+
+Foram encontrados 288 arquivos mensais, correspondentes
+aos 288 meses esperados no período estudado.
+
+\begin{table}[H]
+\centering
+\caption{Validação dos dados de entrada}
+\begin{tabular}{lr}
+\toprule
+Indicador & Resultado \\
+\midrule
+Arquivos esperados & 288 \\
+Arquivos encontrados & 288 \\
+Arquivos HDF5 válidos & 288 \\
+Meses ausentes & 0 \\
+Arquivos duplicados & 0 \\
+Arquivos inválidos & 0 \\
+Cobertura espacial média & 100\% \\
+Dados ausentes no cubo final & 0\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+O conjunto final possui dimensão:
+
+\begin{equation}
+288 \times 25 \times 25
+\end{equation}
+
+correspondente a 288 meses e 625 células espaciais.
+
+% ============================================================
+\section{Metodologia}
+% ============================================================
+
+\subsection{Caracterização exploratória}
+
+Foi calculada a climatologia mensal considerando os
+24 anos disponíveis.
+
+Também foi construída uma série anual regional,
+obtida pela soma das precipitações mensais após a
+agregação espacial ponderada.
+
+A ponderação espacial utiliza:
+
+\begin{equation}
+w_i = \cos(\phi_i)
+\end{equation}
+
+em que $\phi_i$ representa a latitude da célula.
+Essa aproximação considera a variação da área
+representada pelas células em diferentes latitudes.
+
+A média regional ponderada é:
+
+\begin{equation}
+\bar{P}_t =
+\frac{\sum_i w_i P_{i,t}}
+{\sum_i w_i}
+\end{equation}
+
+\subsection{Tendência temporal}
+
+A magnitude das tendências foi estimada pelo
+estimador de Sen:
+
+\begin{equation}
+\beta =
+\operatorname{mediana}
+\left(
+\frac{x_j-x_i}{j-i}
+\right),
+\qquad j>i
+\end{equation}
+
+O teste de Mann--Kendall foi utilizado para avaliar
+a presença de tendência monotônica.
+
+Foram calculados intervalos de confiança de 95\%
+para as estimativas de Sen.
+
+As análises locais foram realizadas individualmente
+para as 625 células espaciais.
+
+\subsection{Correção de múltiplas comparações}
+
+Como foram realizados testes simultâneos em diversas
+células, foi aplicada a correção de Benjamini--Hochberg
+(BH), controlando a taxa de falsas descobertas (FDR).
+
+A significância estatística local foi avaliada
+considerando:
+
+\begin{equation}
+q_i < 0.05
+\end{equation}
+
+A correção foi aplicada separadamente aos resultados
+convencionais de Mann--Kendall e à análise de
+sensibilidade com TFPW.
+
+\subsection{Autocorrelação temporal}
+
+A autocorrelação de defasagem 1 foi examinada
+tanto na série original quanto nos resíduos após
+a remoção da tendência estimada.
+
+Foi realizada uma análise de sensibilidade utilizando
+Trend-Free Pre-Whitening (TFPW).
+
+Essa análise foi tratada como diagnóstico complementar,
+não como correção definitiva da inferência estatística.
+
+\subsection{Autocorrelação espacial}
+
+A dependência espacial das estimativas de Sen foi
+investigada utilizando o Moran Global:
+
+\begin{equation}
+I =
+\frac{n}{S_0}
+\frac{
+\sum_i \sum_j w_{ij} z_i z_j
+}{
+\sum_i z_i^2
+}
+\end{equation}
+
+em que:
+
+\begin{itemize}
+    \item $n$ é o número de células;
+    \item $w_{ij}$ representa a relação de vizinhança;
+    \item $z_i$ representa o desvio da estimativa em
+    relação à média.
+\end{itemize}
+
+Foram utilizadas 9.999 permutações.
+
+\subsection{Moran Local (LISA)}
+
+O Moran Local foi utilizado para identificar
+agrupamentos espaciais:
+
+\begin{itemize}
+    \item HH: valores altos próximos de valores altos;
+    \item LL: valores baixos próximos de valores baixos;
+    \item HL: valores altos próximos de valores baixos;
+    \item LH: valores baixos próximos de valores altos.
+\end{itemize}
+
+Os testes locais também foram submetidos à correção
+FDR por Benjamini--Hochberg.
+
+Os quadrantes representam relações espaciais
+relativas à distribuição das estimativas de Sen.
+Não representam, por si só, tendências temporais
+positivas ou negativas estatisticamente significativas.
+
+\subsection{Índice de cancelamento espacial do IONA}
+
+Foi definido um indicador descritivo próprio,
+denominado Spatial Trend Cancellation Index (STCI):
+
+\begin{equation}
+STCI =
+1 -
+\frac{
+\left|\sum_i w_i \beta_i\right|
+}{
+\sum_i w_i |\beta_i|
+}
+\end{equation}
+
+em que $\beta_i$ representa a estimativa de Sen
+para a célula $i$ e $w_i$ representa seu peso espacial.
+
+O índice varia entre zero e um:
+
+\begin{itemize}
+    \item Valores próximos de zero indicam pouca
+    compensação entre magnitudes positivas e negativas.
+    \item Valores próximos de um indicam maior
+    compensação entre contribuições positivas e negativas.
+\end{itemize}
+
+O STCI é uma métrica descritiva definida pelo projeto
+IONA, não um índice climático padronizado.
+
+O indicador utiliza estimativas pontuais e não
+incorpora a incerteza estatística das inclinações.
+
+\subsection{Robustez da vizinhança espacial}
+
+A estabilidade dos resultados espaciais foi avaliada
+comparando duas matrizes de contiguidade:
+
+\begin{itemize}
+    \item Queen: considera vizinhos laterais e diagonais.
+    \item Rook: considera somente vizinhos que compartilham
+    uma aresta.
+\end{itemize}
+
+A concordância das classificações foi calculada
+diretamente. A sobreposição dos agrupamentos foi
+avaliada pelo índice de Jaccard:
+
+\begin{equation}
+J(A,B) =
+\frac{|A \cap B|}{|A \cup B|}
+\end{equation}
+
+% ============================================================
+\section{Resultados}
+% ============================================================
+
+\subsection{Sazonalidade}
+
+A climatologia mensal apresentou forte sazonalidade,
+com maiores acumulados entre outubro e abril e
+menores valores entre maio e setembro.
+
+\begin{table}[H]
+\centering
+\caption{Climatologia mensal regional}
+\begin{tabular}{lc}
+\toprule
+Mês & Precipitação média (mm) \\
+\midrule
+Janeiro & 221.45 \\
+Fevereiro & 182.95 \\
+Março & 200.35 \\
+Abril & 97.18 \\
+Maio & 18.60 \\
+Junho & 2.49 \\
+Julho & 0.56 \\
+Agosto & 6.76 \\
+Setembro & 24.33 \\
+Outubro & 109.18 \\
+Novembro & 230.44 \\
+Dezembro & 243.03 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Tendência regional}
+
+A estimativa regional de Sen foi:
+
+\begin{equation}
+\beta = -11.048
+\end{equation}
+
+em unidades de mm/ano de precipitação anual
+por ano de calendário.
+
+O intervalo de confiança de 95\% foi:
+
+\begin{equation}
+IC_{95\%} = [-27.679,\ 5.828]
+\end{equation}
+
+O teste de Mann--Kendall apresentou:
+
+\begin{itemize}
+    \item Kendall's tau: $-0.2174$;
+    \item valor-p: $0.144623$.
+\end{itemize}
+
+O intervalo de confiança inclui zero e o valor-p
+é superior a 0.05. Portanto, não há evidência
+estatística suficiente, por esses testes, para
+afirmar uma tendência monotônica regional no
+período analisado.
+
+\subsection{Tendências locais}
+
+Foram avaliadas 625 células.
+
+\begin{table}[H]
+\centering
+\caption{Resultados dos testes temporais locais}
+\begin{tabular}{lr}
+\toprule
+Indicador & Resultado \\
+\midrule
+Células analisadas & 625 \\
+Significativas após FDR (MK) & 0 \\
+Significativas após FDR (TFPW) & 0 \\
+Significativas em ambos & 0 \\
+Células classificadas como aumento robusto & 0 \\
+Células classificadas como redução robusta & 0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+A ausência de células significativas após FDR não
+demonstra que todas as inclinações sejam nulas.
+Indica que os testes realizados não forneceram
+evidência suficiente para declarar tendências
+temporais locais significativas após a correção
+de múltiplas comparações.
+
+\subsection{Distribuição espacial das inclinações}
+
+A distribuição das estimativas de Sen apresentou:
+
+\begin{itemize}
+    \item 618 células com inclinação negativa;
+    \item 7 células com inclinação positiva;
+    \item média das inclinações: $-10.4161$;
+    \item mediana: $-10.6109$;
+    \item mínimo: $-16.7726$;
+    \item máximo: $+6.3680$.
+\end{itemize}
+
+As sete estimativas positivas se concentraram no
+setor noroeste da região-piloto.
+
+Entretanto, nenhuma dessas células apresentou
+significância temporal após FDR.
+
+\subsection{Spatial Trend Cancellation Index}
+
+O STCI calculado foi:
+
+\begin{equation}
+STCI = 0.0056
+\end{equation}
+
+Equivalente a aproximadamente 0.56\%.
+
+As contribuições ponderadas foram:
+
+\begin{itemize}
+    \item contribuição positiva: aproximadamente 0.28\%;
+    \item contribuição negativa: aproximadamente 99.72\%.
+\end{itemize}
+
+O resultado indica compensação muito pequena entre
+as inclinações positivas e negativas estimadas.
+
+Portanto, neste recorte e período, o índice não
+aponta cancelamento expressivo entre tendências
+de direções opostas.
+
+Esse resultado é descritivo e não deve ser
+interpretado como confirmação de uma tendência
+climática regional.
+
+\subsection{Moran Global}
+
+A análise de autocorrelação espacial utilizando
+contiguidade Queen apresentou:
+
+\begin{equation}
+I = 0.852985
+\end{equation}
+
+com valor-p por permutação igual a 0.0001.
+
+O resultado indica forte autocorrelação espacial
+positiva nas estimativas de Sen: células próximas
+tendem a apresentar magnitudes semelhantes.
+
+Esse teste avalia a organização espacial das
+estimativas, não a significância temporal das
+tendências.
+
+\subsection{Moran Local (LISA)}
+
+A análise Queen identificou 322 células significativas
+após FDR:
+
+\begin{table}[H]
+\centering
+\caption{Agrupamentos LISA com contiguidade Queen}
+\begin{tabular}{lr}
+\toprule
+Classificação & Células \\
+\midrule
+High-High & 136 \\
+Low-Low & 186 \\
+High-Low & 0 \\
+Low-High & 0 \\
+Não significativas & 303 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Os agrupamentos HH e LL representam regiões com
+magnitudes relativamente altas e baixas das
+estimativas de Sen, respectivamente.
+
+Importante: HH não significa necessariamente
+tendência temporal positiva, assim como LL não
+significa necessariamente tendência temporal negativa.
+
+A maioria das células HH também apresenta
+inclinações negativas. Portanto, os agrupamentos
+separam principalmente magnitudes relativas,
+e não direções temporais opostas.
+
+\subsection{Contraste HH versus LL}
+
+A comparação exploratória apresentou:
+
+\begin{table}[H]
+\centering
+\caption{Contraste das estimativas de Sen}
+\begin{tabular}{lrr}
+\toprule
+Estatística & HH & LL \\
+\midrule
+Número de células & 136 & 186 \\
+Média & -5.9633 & -13.8966 \\
+Mediana & -6.4655 & -13.9218 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+A diferença entre as médias foi:
+
+\begin{equation}
+\Delta_{\mathrm{HH-LL}} = 7.9332
+\end{equation}
+
+O teste exploratório de permutação apresentou
+valor-p de 0.0001.
+
+Esse teste não considera a dependência espacial
+nem o fato de os grupos terem sido definidos
+a partir das próprias estimativas analisadas.
+Consequentemente, seu valor-p não deve ser
+interpretado como evidência inferencial independente.
+
+O contraste descreve uma diferença de magnitude
+entre os agrupamentos identificados.
+
+\subsection{Robustez Queen versus Rook}
+
+A comparação das matrizes de vizinhança produziu:
+
+\begin{table}[H]
+\centering
+\caption{Comparação das matrizes de contiguidade}
+\begin{tabular}{lrr}
+\toprule
+Indicador & Queen & Rook \\
+\midrule
+Moran Global & 0.852985 & 0.883403 \\
+Valor-p global & 0.0001 & 0.0001 \\
+Células LISA significativas & 322 & 139 \\
+HH & 136 & 43 \\
+LL & 186 & 96 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Indicadores de concordância:
+
+\begin{itemize}
+    \item Concordância das classificações: 70.72\%;
+    \item Jaccard dos agrupamentos significativos: 0.432;
+    \item Jaccard HH: 0.316;
+    \item Jaccard LL: 0.516.
+\end{itemize}
+
+O Moran Global permaneceu elevado nas duas
+configurações, indicando que a autocorrelação
+espacial geral é consistente.
+
+Entretanto, a delimitação dos agrupamentos locais
+apresentou sensibilidade à definição de vizinhança.
+
+Assim, os agrupamentos LISA devem ser apresentados
+como resultados exploratórios, e não como
+fronteiras espaciais definitivas.
+
+% ============================================================
+\section{Discussão}
+% ============================================================
+
+Os resultados demonstram que a análise espacial
+pode revelar estruturas que não são descritas
+adequadamente por uma única estatística regional.
+
+A forte autocorrelação espacial das inclinações
+indica que as estimativas apresentam organização
+geográfica: células próximas tendem a possuir
+magnitudes semelhantes.
+
+Entretanto, a ausência de significância temporal
+após FDR impede afirmar que essas inclinações
+representem tendências temporais estatisticamente
+confirmadas.
+
+A análise LISA identificou agrupamentos de
+magnitudes relativamente altas e baixas. A
+comparação entre HH e LL indicou uma diferença
+descritiva relevante entre os valores estimados.
+
+Contudo, a sensibilidade à matriz de vizinhança
+mostra que a delimitação desses agrupamentos
+não é inteiramente estável.
+
+O STCI também apresentou baixo cancelamento
+entre contribuições positivas e negativas.
+Portanto, os resultados deste recorte não
+sustentam a hipótese de que uma média regional
+esteja escondendo uma forte compensação entre
+tendências temporais de sinais opostos.
+
+Essas conclusões são específicas da região-piloto,
+do produto utilizado, da resolução espacial e
+do período estudado.
+
+% ============================================================
+\section{Limitações}
+% ============================================================
+
+As principais limitações são:
+
+\begin{enumerate}
+    \item \textbf{Recorte geográfico:} a área utilizada
+    é um retângulo-piloto e não o polígono oficial
+    completo do Cerrado.
+
+    \item \textbf{Período:} 24 anos representam uma
+    série relativamente curta para caracterização
+    de tendências climáticas de longo prazo.
+
+    \item \textbf{Autocorrelação temporal:} os testes
+    convencionais podem ser afetados pela dependência
+    serial. A análise TFPW utilizada é uma análise
+    de sensibilidade e não resolve integralmente
+    a incerteza associada à estimação da tendência
+    e da autocorrelação.
+
+    \item \textbf{Dependência espacial:} a correção
+    FDR convencional não elimina a dependência
+    entre células vizinhas.
+
+    \item \textbf{Sensibilidade LISA:} os agrupamentos
+    locais variam conforme a matriz de vizinhança.
+
+    \item \textbf{Incerteza do STCI:} o índice utiliza
+    estimativas pontuais e não incorpora intervalos
+    de confiança ou propagação de incerteza.
+
+    \item \textbf{Dados de precipitação:} produtos
+    de sensoriamento remoto possuem incertezas
+    próprias de estimativa e recuperação.
+\end{enumerate}
+
+% ============================================================
+\section{Conclusões}
+% ============================================================
+
+A análise realizada pelo IONA identificou forte
+organização espacial nas estimativas de tendência
+da precipitação na região-piloto.
+
+O Moran Global apresentou valores elevados tanto
+para a matriz Queen quanto para a matriz Rook,
+indicando que a autocorrelação espacial geral
+não depende exclusivamente da inclusão de
+vizinhos diagonais.
+
+Por outro lado, a classificação local LISA
+apresentou sensibilidade à matriz de vizinhança,
+exigindo cautela na interpretação dos agrupamentos.
+
+Os testes temporais não identificaram tendências
+regionais ou locais estatisticamente significativas
+após os procedimentos de avaliação e correção
+utilizados.
+
+O STCI calculado também indicou baixo cancelamento
+entre as estimativas positivas e negativas.
+
+Portanto, os resultados deste estudo-piloto não
+confirmam a hipótese de forte cancelamento de
+tendências temporais opostas na região analisada.
+
+O principal resultado metodológico do IONA é
+demonstrar a importância de separar três dimensões:
+
+\begin{enumerate}
+    \item magnitude e direção das estimativas
+    temporais;
+    \item significância estatística das tendências;
+    \item organização espacial das estimativas.
+\end{enumerate}
+
+Essa separação permite produzir interpretações
+mais rigorosas e evita que agrupamentos espaciais
+sejam confundidos com evidências de mudança
+climática temporal.
+
+% ============================================================
+\section{Trabalhos futuros}
+% ============================================================
+
+As próximas etapas de desenvolvimento do IONA incluem:
+
+\begin{itemize}
+    \item Aplicar uma máscara geográfica oficial
+    do bioma Cerrado.
+    \item Investigar a estabilidade das estimativas
+    com métodos adicionais para autocorrelação temporal.
+    \item Avaliar incertezas associadas às estimativas
+    de tendência e ao STCI.
+    \item Integrar outras variáveis ambientais
+    disponibilizadas por fontes NASA.
+    \item Desenvolver detecção de anomalias e
+    identificação de padrões com aprendizado de máquina.
+    \item Construir uma interface interativa para
+    exploração dos resultados.
+    \item Implementar geração de relatórios com
+    rastreabilidade dos dados e métodos.
+\end{itemize}
+
+% ============================================================
+\section*{Referências}
+% ============================================================
+
+\begin{enumerate}
+
+    \item NASA. \textit{Global Precipitation Measurement
+    (GPM) -- IMERG}. Disponível em:
+    \url{https://gpm.nasa.gov/data/imerg}.
+
+    \item NASA GES DISC. \textit{GPM IMERG Monthly Final
+    Run V07}. DOI:
+    \url{https://doi.org/10.5067/GPM/IMERG/3B-MONTH/07}.
+
+    \item MANN, H. B. Nonparametric Tests Against Trend.
+    \textit{Econometrica}, v. 13, n. 3, p. 245--259, 1945.
+
+    \item KENDALL, M. G. \textit{Rank Correlation Methods}.
+    London: Griffin, 1975.
+
+    \item SEN, P. K. Estimates of the Regression
+    Coefficient Based on Kendall's Tau.
+    \textit{Journal of the American Statistical
+    Association}, v. 63, n. 324, p. 1379--1389, 1968.
+
+    \item BENJAMINI, Y.; HOCHBERG, Y. Controlling the
+    False Discovery Rate: A Practical and Powerful
+    Approach to Multiple Testing.
+    \textit{Journal of the Royal Statistical Society:
+    Series B}, v. 57, n. 1, p. 289--300, 1995.
+
+    \item MORAN, P. A. P. Notes on Continuous Stochastic
+    Phenomena. \textit{Biometrika}, v. 37, n. 1/2,
+    p. 17--23, 1950.
+
+    \item ANSELIN, L. Local Indicators of Spatial
+    Association---LISA.
+    \textit{Geographical Analysis}, v. 27, n. 2,
+    p. 93--115, 1995.
+
+\end{enumerate}
+
+\end{document}
