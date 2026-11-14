@@ -1,0 +1,195 @@
+from pathlib import Path
+
+html = r'''<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IONA — Earth Intelligence & Pattern Discovery</title>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&display=swap');
+:root{
+ --bg:#080d13;--panel:#101923;--panel2:#0c141d;--line:#1e2c39;
+ --text:#e7eef4;--muted:#8192a1;--cyan:#5ce1d2;--blue:#69a9ff;
+ --orange:#f2a766;--red:#f07878;--green:#7bd6a7;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif}
+.app{min-height:100vh;display:grid;grid-template-columns:245px 1fr}
+.sidebar{background:#0b121a;border-right:1px solid var(--line);padding:25px 17px;display:flex;flex-direction:column;gap:28px}
+.brand{display:flex;align-items:center;gap:11px;padding:0 8px}
+.logo{width:35px;height:35px;border:1px solid #397e7c;border-radius:10px;display:grid;place-items:center;color:var(--cyan);font:500 19px 'DM Mono';box-shadow:0 0 22px #5ce1d21c}
+.brand-name{font:500 22px 'DM Mono';letter-spacing:3px}
+.brand-sub{font:9px 'DM Mono';letter-spacing:1.1px;color:var(--muted);margin-top:3px}
+.nav-label{font:10px 'DM Mono';letter-spacing:1.5px;color:#607282;padding:0 11px;margin-bottom:9px}
+.nav{display:grid;gap:5px}
+.nav a{color:#91a2b1;text-decoration:none;padding:11px 12px;border-radius:8px;font-size:13px;display:flex;gap:12px;align-items:center}
+.nav a.active{background:#173033;color:var(--cyan);border:1px solid #24504e}
+.nav a span{width:17px;text-align:center;font-size:15px}
+.side-bottom{margin-top:auto;border-top:1px solid var(--line);padding:18px 9px 0;color:var(--muted);font:10px 'DM Mono';line-height:1.8}
+.status-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:6px}
+main{padding:27px 32px 40px;max-width:1600px;width:100%;margin:auto}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:26px;gap:16px}
+.eyebrow{font:10px 'DM Mono';letter-spacing:1.8px;color:var(--cyan);text-transform:uppercase}
+h1{font-size:25px;letter-spacing:-.6px;margin:7px 0 5px}
+.subtitle{font-size:12px;color:var(--muted)}
+.top-right{display:flex;align-items:center;gap:10px}
+.pill{border:1px solid var(--line);border-radius:20px;padding:8px 12px;color:#a6b5c2;font:10px 'DM Mono'}
+.pill.demo{color:var(--orange);border-color:#6c4b2d;background:#2a1d13}
+.button{background:#173c3b;border:1px solid #28605b;color:var(--cyan);border-radius:7px;padding:9px 13px;font:11px 'DM Mono';cursor:pointer}
+.filters{display:flex;flex-wrap:wrap;align-items:end;gap:12px;padding:15px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;margin-bottom:17px}
+.field{display:grid;gap:6px;min-width:130px}
+.field label{font:9px 'DM Mono';letter-spacing:1px;color:var(--muted);text-transform:uppercase}
+select{background:#111d28;color:var(--text);border:1px solid #2a3b49;border-radius:6px;padding:9px 30px 9px 10px;font:11px 'DM Sans';outline:none}
+.filter-note{margin-left:auto;color:#718493;font:10px 'DM Mono';align-self:center}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:17px}
+.metric,.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px}
+.metric{padding:15px 16px;min-height:104px}
+.metric-label{font:9px 'DM Mono';letter-spacing:1.2px;color:var(--muted);text-transform:uppercase}
+.metric-value{font:24px 'DM Mono';margin:11px 0 4px}
+.metric-foot{font-size:10px;color:#8495a3}
+.cyan{color:var(--cyan)}.orange{color:var(--orange)}.blue{color:var(--blue)}.green{color:var(--green)}
+.grid-main{display:grid;grid-template-columns:1.35fr 1fr;gap:14px;margin-bottom:14px}
+.panel{padding:17px;min-width:0}
+.panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
+.panel-title{font-size:13px;font-weight:700}
+.panel-desc{font-size:10px;color:var(--muted);margin-top:4px}
+.tag{font:9px 'DM Mono';color:#8fa1af;border:1px solid #2a3b49;padding:5px 7px;border-radius:5px;white-space:nowrap}
+.chart{height:255px;width:100%}
+.map-wrap{height:255px;border:1px solid #243441;border-radius:8px;overflow:hidden;position:relative;background:#0b1821}
+.map-wrap svg{width:100%;height:100%;display:block}
+.map-legend{display:flex;justify-content:space-between;align-items:center;font:9px 'DM Mono';color:var(--muted);margin-top:9px}
+.gradient{height:7px;width:120px;border-radius:10px;background:linear-gradient(90deg,#4a79b9,#7d9f9e,#e6bd68,#c85e57)}
+.legend-left{display:flex;align-items:center;gap:8px}
+.bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.insight{display:flex;gap:12px;padding:12px;background:#0d1d22;border:1px solid #21403e;border-radius:8px;margin-top:12px}
+.insight-icon{color:var(--cyan);font-size:17px}
+.insight strong{font-size:11px;display:block;margin-bottom:4px}
+.insight p{font-size:10px;color:#9babb5;line-height:1.55;margin:0}
+.method-list{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:13px}
+.method{padding:10px;background:#0c151e;border:1px solid #1d2b36;border-radius:7px}
+.method b{font:11px 'DM Mono';color:var(--blue)}
+.method span{display:block;font-size:9px;color:var(--muted);margin-top:5px;line-height:1.4}
+.activity{display:grid;gap:10px;margin-top:14px}
+.activity-row{display:flex;justify-content:space-between;gap:10px;font-size:10px;color:#a4b3bf;border-bottom:1px solid #1b2934;padding-bottom:9px}
+.activity-row span:last-child{color:var(--muted);font:9px 'DM Mono'}
+.footer{margin-top:18px;color:#5f7180;font:9px 'DM Mono';display:flex;justify-content:space-between;gap:10px}
+@media(max-width:1050px){.app{grid-template-columns:200px 1fr}.grid-main{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:720px){.app{display:block}.sidebar{display:none}main{padding:20px 14px}.topbar{align-items:flex-start;flex-direction:column}.metrics{grid-template-columns:1fr 1fr}.bottom-grid{grid-template-columns:1fr}.filter-note{width:100%;margin:0}.metric-value{font-size:20px}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+ <div class="brand"><div class="logo">I</div><div><div class="brand-name">IONA</div><div class="brand-sub">EARTH INTELLIGENCE</div></div></div>
+ <div><div class="nav-label">WORKSPACE</div><nav class="nav">
+  <a class="active" href="#"><span>⌂</span>Overview</a>
+  <a href="#explorer"><span>◉</span>Earth Explorer</a>
+  <a href="#trends"><span>⌁</span>Trend Laboratory</a>
+  <a href="#patterns"><span>▦</span>Pattern Detective</a>
+  <a href="#earthmind"><span>✳</span>EARTH-MIND</a>
+ </nav></div>
+ <div><div class="nav-label">PROJECT</div><nav class="nav">
+  <a href="#sources"><span>⌑</span>Data & Sources</a>
+  <a href="#method"><span>∑</span>Methodology</a>
+  <a href="#report"><span>↗</span>Evidence Report</a>
+ </nav></div>
+ <div class="side-bottom"><span class="status-dot"></span>PROTOTYPE INTERFACE<br>NASA SPACE APPS 2026<br>IONA / BUILD 0.1</div>
+</aside>
+
+<main>
+ <header class="topbar">
+  <div><div class="eyebrow">Earth system analytics / workspace 01</div><h1>Discover what the averages hide.</h1><div class="subtitle">Explore environmental change, detect spatial divergence, and investigate meaningful trends.</div></div>
+  <div class="top-right"><span class="pill demo">● DEMO DATA</span><span class="pill">CERRADO / BR</span></div>
+ </header>
+
+ <section class="filters" id="explorer">
+  <div class="field"><label>Earth variable</label><select id="variable"><option>Precipitation</option><option>Land surface temperature</option><option>Vegetation index</option></select></div>
+  <div class="field"><label>Study region</label><select><option>Brazilian Cerrado</option><option>Distrito Federal</option><option>Custom region</option></select></div>
+  <div class="field"><label>Start date</label><select><option>Jan 2001</option><option>Jan 2010</option></select></div>
+  <div class="field"><label>End date</label><select><option>Dec 2024</option><option>Dec 2023</option></select></div>
+  <button class="button" onclick="refreshDemo()">↻ Apply filters</button>
+  <div class="filter-note">Illustrative interface · values are not NASA observations</div>
+ </section>
+
+ <section class="metrics">
+  <div class="metric"><div class="metric-label">Regional trend</div><div class="metric-value cyan" id="metricTrend">−1.8%</div><div class="metric-foot">Illustrative change per decade</div></div>
+  <div class="metric"><div class="metric-label">Local trend directions</div><div class="metric-value orange">2 opposing</div><div class="metric-foot">Positive and negative subregions</div></div>
+  <div class="metric"><div class="metric-label">Trend significance</div><div class="metric-value blue">p = 0.03</div><div class="metric-foot">Demo value · method pending</div></div>
+  <div class="metric"><div class="metric-label">Spatial divergence</div><div class="metric-value green">0.67</div><div class="metric-foot">Experimental IONA index · 0–1</div></div>
+ </section>
+
+ <section class="grid-main">
+  <article class="panel" id="trends">
+   <div class="panel-head"><div><div class="panel-title">Regional time series</div><div class="panel-desc">Monthly precipitation · regional mean and illustrative variability</div></div><span class="tag">TREND LAB</span></div>
+   <div id="timeseries" class="chart"></div>
+  </article>
+  <article class="panel" id="patterns">
+   <div class="panel-head"><div><div class="panel-title">Spatial trend distribution</div><div class="panel-desc">Illustrative pattern across the study region</div></div><span class="tag">PATTERN DETECTIVE</span></div>
+   <div class="map-wrap">
+    <svg viewBox="0 0 620 310" preserveAspectRatio="xMidYMid meet" aria-label="Mapa esquemático demonstrativo do Cerrado">
+     <defs><pattern id="grid" width="31" height="31" patternUnits="userSpaceOnUse"><path d="M31 0H0V31" fill="none" stroke="#203342" stroke-width="1"/></pattern></defs>
+     <rect width="620" height="310" fill="#0b1821"/><rect width="620" height="310" fill="url(#grid)"/>
+     <path d="M135 45 L208 26 286 48 355 34 435 70 493 121 466 184 414 225 344 246 267 230 207 254 145 214 106 151Z" fill="#162d34" stroke="#547a77" stroke-width="2" stroke-dasharray="5 4"/>
+     <g opacity=".9">
+      <path d="M175 78l47 -18 38 17 -9 35 -49 12 -34 -17Z" fill="#c85e57"/><path d="M261 77l46 -19 38 18 -8 39 -52 9 -30 -19Z" fill="#e2a45f"/>
+      <path d="M350 75l48 6 24 34 -34 25 -47 -17Z" fill="#6f9b9b"/><path d="M412 121l39 5 14 38 -42 21 -28 -28Z" fill="#4c79b5"/>
+      <path d="M146 137l43 -15 38 23 -10 42 -50 8 -29 -27Z" fill="#d38a5d"/><path d="M229 132l52 -16 38 28 -11 43 -53 12 -34 -29Z" fill="#b85e5d"/>
+      <path d="M322 135l47 -12 34 27 -16 42 -52 8 -26 -31Z" fill="#5b8a9d"/><path d="M390 184l43 -15 24 31 -30 31 -47 -9Z" fill="#4775b3"/>
+      <path d="M195 198l50 -12 37 29 -27 30 -49 -3 -25 -22Z" fill="#d7a35f"/><path d="M282 203l48 -12 36 23 -25 29 -49 0 -22 -18Z" fill="#739c8a"/>
+     </g>
+     <g fill="#d9e5e8" font-family="DM Mono" font-size="10"><text x="25" y="25">N</text><text x="30" y="294">S</text><text x="515" y="294">EAST / WEST</text></g>
+     <g fill="#a9bac3" font-family="DM Sans" font-size="11"><text x="250" y="286">BRAZILIAN CERRADO · SCHEMATIC</text></g>
+     <g stroke="#d5e4e8" stroke-width="1" opacity=".5"><path d="M310 18v15m-5 -5h10"/></g>
+    </svg>
+   </div>
+   <div class="map-legend"><div class="legend-left"><span>Declining</span><div class="gradient"></div><span>Increasing</span></div><span>Grid shown for concept only</span></div>
+  </article>
+ </section>
+
+ <section class="bottom-grid">
+  <article class="panel" id="earthmind">
+   <div class="panel-head"><div><div class="panel-title">EARTH-MIND / Pattern interpretation</div><div class="panel-desc">Machine-learning assisted exploration · not causal inference</div></div><span class="tag">AI MODULE</span></div>
+   <div class="insight"><div class="insight-icon">✳</div><div><strong>Regional aggregation may conceal local contrasts.</strong><p>In this illustrative scenario, subregions show trends in opposing directions. The regional mean can therefore understate the magnitude and spatial complexity of local change.</p></div></div>
+   <div class="method-list">
+    <div class="method"><b>ANOMALY DETECTION</b><span>Flags unusual observations for scientific review.</span></div>
+    <div class="method"><b>SPATIAL CLUSTERING</b><span>Groups areas with similar temporal behavior.</span></div>
+   </div>
+  </article>
+  <article class="panel" id="method">
+   <div class="panel-head"><div><div class="panel-title">Statistical evidence</div><div class="panel-desc">Methods to be applied and validated against the selected dataset</div></div><span class="tag">METHODS</span></div>
+   <div class="activity">
+    <div class="activity-row"><span>Sen’s slope</span><span>Trend magnitude</span></div>
+    <div class="activity-row"><span>Mann–Kendall test</span><span>Monotonic trend</span></div>
+    <div class="activity-row"><span>Seasonal / autocorrelation checks</span><span>Assumption diagnostics</span></div>
+    <div class="activity-row"><span>Benjamini–Hochberg FDR</span><span>Multiple spatial tests</span></div>
+    <div class="activity-row"><span>Confidence intervals & missingness</span><span>Uncertainty reporting</span></div>
+   </div>
+  </article>
+ </section>
+
+ <section class="panel" id="sources" style="margin-top:14px">
+  <div class="panel-head"><div><div class="panel-title">Data provenance</div><div class="panel-desc">Every result must remain traceable to its original source and processing history.</div></div><span class="tag">NASA EARTH SCIENCE</span></div>
+  <div class="activity">
+   <div class="activity-row"><span>Candidate dataset · GPM IMERG Monthly V07B</span><span>NASA / GES DISC</span></div>
+   <div class="activity-row"><span>Product identifier · GPM_3IMERGM</span><span>HDF5 · source metadata to verify</span></div>
+   <div class="activity-row"><span>Current local sample · Jan–Mar 2024</span><span>Downloaded · pending inspection</span></div>
+  </div>
+ </section>
+ <div class="footer"><span>IONA · EARTH INTELLIGENCE & PATTERN DISCOVERY</span><span>REVEALING WHAT THE AVERAGES HIDE.</span></div>
+</main>
+</div>
+<script>
+const months=Array.from({length:48},(_,i)=>{let d=new Date(2021, i,1);return d.toLocaleDateString('en-US',{month:'short',year:'2-digit'})});
+const values=months.map((_,i)=>48+Math.sin(i*.48)*9+Math.cos(i*.17)*5-i*.12+(Math.sin(i*1.8)*3));
+const layout={paper_bgcolor:'rgba(0,0,0,0)',plot_bgcolor:'rgba(0,0,0,0)',margin:{l:42,r:15,t:8,b:35},font:{family:'DM Sans',color:'#91a2b1',size:10},xaxis:{gridcolor:'#1d2b36',zerolinecolor:'#1d2b36',tickfont:{size:9}},yaxis:{gridcolor:'#1d2b36',zerolinecolor:'#1d2b36',title:{text:'mm / month (illustrative)',font:{size:9}}},showlegend:false};
+Plotly.newPlot('timeseries',[{x:months,y:values,type:'scatter',mode:'lines',line:{color:'#5ce1d2',width:2},fill:'tozeroy',fillcolor:'rgba(92,225,210,.08)',hovertemplate:'%{x}<br>%{y:.1f}<extra></extra>'},{x:months,y:values.map((_,i)=>52-i*.12),type:'scatter',mode:'lines',line:{color:'#f2a766',width:1.5,dash:'dot'},hovertemplate:'Trend demo: %{y:.1f}<extra></extra>'}],layout,{displayModeBar:false,responsive:true});
+function refreshDemo(){document.getElementById('metricTrend').textContent=document.getElementById('variable').value==='Precipitation'?'−1.8%':'DEMO';}
+</script>
+</body>
+</html>'''
+
+path = Path("/mnt/data/iona_interface_prototype.html")
+path.write_text(html, encoding="utf-8")
+print(f"Arquivo criado: {path}")

@@ -1,0 +1,18 @@
+{
+    "project": "IONA",
+    "dataset_short_name": "GPM_3IMERGM",
+    "start_date": "2024-01-01",
+    "end_date": "2024-03-31",
+    "bounding_box": [
+        -48.5,
+        -16.5,
+        -46.0,
+        -14.0
+    ],
+    "files_downloaded": [
+        "C:\\Users\\Sony\\Documents\\GitHub\\IONA\\data\\raw\\gpm_imerg\\3B-MO.MS.MRG.3IMERG.20240101-S000000-E235959.01.V07B.HDF5",
+        "C:\\Users\\Sony\\Documents\\GitHub\\IONA\\data\\raw\\gpm_imerg\\3B-MO.MS.MRG.3IMERG.20240201-S000000-E235959.02.V07B.HDF5",
+        "C:\\Users\\Sony\\Documents\\GitHub\\IONA\\data\\raw\\gpm_imerg\\3B-MO.MS.MRG.3IMERG.20240301-S000000-E235959.03.V07B.HDF5"
+    ],
+    "download_date_utc": "2026-11-14T14:18:12.906612+00:00"
+}
