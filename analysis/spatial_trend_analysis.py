@@ -4,12 +4,12 @@ import csv
 import json
 
 import numpy as np
-from scipy.stats import theilslopes, kendalltau
+from scipy.stats import theilslopes, kendalltau, pearsonr
 
 
-# ==========================================
-# CONFIGURAÇÕES
-# ==========================================
+# ============================================================
+# CONFIGURATION
+# ============================================================
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -23,13 +23,14 @@ START_YEAR = 2001
 END_YEAR = 2024
 
 ALPHA = 0.05
+MIN_OBSERVATIONS = 10
 
 
-# ==========================================
-# BENJAMINI-HOCHBERG (FDR)
-# ==========================================
+# ============================================================
+# BENJAMINI-HOCHBERG FDR
+# ============================================================
 
-def benjamini_hochberg(p_values, alpha=0.05):
+def benjamini_hochberg(p_values):
 
     p_values = np.asarray(p_values, dtype=float)
 
@@ -43,17 +44,16 @@ def benjamini_hochberg(p_values, alpha=0.05):
     valid_p = p_values[valid_indices]
 
     order = np.argsort(valid_p)
-
     sorted_p = valid_p[order]
 
     n = len(sorted_p)
-
     ranks = np.arange(1, n + 1)
 
     adjusted = sorted_p * n / ranks
 
-    # Garantir monotonicidade dos valores ajustados.
-    adjusted = np.minimum.accumulate(adjusted[::-1])[::-1]
+    adjusted = np.minimum.accumulate(
+        adjusted[::-1]
+    )[::-1]
 
     adjusted = np.clip(adjusted, 0, 1)
 
@@ -65,9 +65,9 @@ def benjamini_hochberg(p_values, alpha=0.05):
     return q_values
 
 
-# ==========================================
-# AUTOCORRELAÇÃO LAG-1
-# ==========================================
+# ============================================================
+# LAG-1 AUTOCORRELATION
+# ============================================================
 
 def lag1_autocorrelation(series):
 
@@ -85,17 +85,86 @@ def lag1_autocorrelation(series):
     return float(np.corrcoef(first, second)[0, 1])
 
 
-# ==========================================
-# ANÁLISE DE UMA CÉLULA
-# ==========================================
+# ============================================================
+# TREND-FREE PRE-WHITENING
+# ============================================================
 
-def analyze_cell(series, years):
+def trend_free_prewhitening(values, years):
+
+    values = np.asarray(values, dtype=float)
+    years = np.asarray(years, dtype=float)
+
+    result = {
+        "residual_lag1": np.nan,
+        "tfpw_tau": np.nan,
+        "tfpw_p_value": np.nan,
+        "tfpw_observations": 0
+    }
+
+    if len(values) < MIN_OBSERVATIONS:
+        return result
+
+    # TFPW requires consecutive annual observations.
+    if not np.all(np.diff(years) == 1):
+        return result
+
+    # Estimate the original monotonic trend.
+    sen = theilslopes(
+        values,
+        years,
+        alpha=0.95
+    )
+
+    # Remove the estimated trend.
+    trend = sen.intercept + sen.slope * years
+    residuals = values - trend
+
+    # Estimate lag-1 autocorrelation on detrended residuals.
+    r1 = lag1_autocorrelation(residuals)
+
+    result["residual_lag1"] = (
+        float(r1) if np.isfinite(r1) else np.nan
+    )
+
+    if not np.isfinite(r1):
+        return result
+
+    # Pre-whiten the detrended residuals.
+    whitened_residuals = (
+        residuals[1:] - r1 * residuals[:-1]
+    )
+
+    # Reintroduce the original estimated trend.
+    tfpw_values = (
+        trend[1:] + whitened_residuals
+    )
+
+    # Apply Mann-Kendall to the adjusted series.
+    tfpw_mk = kendalltau(
+        years[1:],
+        tfpw_values,
+        alternative="two-sided"
+    )
+
+    result["tfpw_tau"] = float(tfpw_mk.statistic)
+    result["tfpw_p_value"] = float(tfpw_mk.pvalue)
+    result["tfpw_observations"] = len(tfpw_values)
+
+    return result
+
+
+# ============================================================
+# ANALYSIS OF ONE TIME SERIES
+# ============================================================
+
+def analyze_series(series, years):
 
     series = np.asarray(series, dtype=float)
+    years = np.asarray(years, dtype=float)
 
     valid = np.isfinite(series)
 
-    if valid.sum() < 10:
+    if valid.sum() < MIN_OBSERVATIONS:
         return None
 
     values = series[valid]
@@ -104,44 +173,69 @@ def analyze_cell(series, years):
     if np.unique(values).size < 2:
         return None
 
+    # Original Sen's slope.
     sen = theilslopes(
         values,
         valid_years,
         alpha=0.95
     )
 
+    # Conventional Mann-Kendall.
     mk = kendalltau(
         valid_years,
         values,
         alternative="two-sided"
     )
 
+    # Original-series autocorrelation.
+    raw_lag1 = lag1_autocorrelation(values)
+
+    # Trend-free pre-whitening sensitivity analysis.
+    tfpw = trend_free_prewhitening(
+        values,
+        valid_years
+    )
+
     return {
         "sen_slope": float(sen.slope),
         "sen_ci_lower": float(sen.low_slope),
         "sen_ci_upper": float(sen.high_slope),
+
         "kendall_tau": float(mk.statistic),
         "p_value": float(mk.pvalue),
-        "lag1_autocorrelation": lag1_autocorrelation(values),
+
+        "raw_lag1_autocorrelation": raw_lag1,
+
+        "residual_lag1_autocorrelation": (
+            tfpw["residual_lag1"]
+        ),
+
+        "tfpw_kendall_tau": tfpw["tfpw_tau"],
+        "tfpw_p_value": tfpw["tfpw_p_value"],
+        "tfpw_observations": tfpw["tfpw_observations"],
+
         "observations": int(valid.sum())
     }
 
 
-# ==========================================
+# ============================================================
 # MAIN
-# ==========================================
+# ============================================================
 
 def main():
 
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    OUTPUT_DIR.mkdir(
+        parents=True,
+        exist_ok=True
+    )
 
-    print("\n" + "=" * 60)
-    print("IONA | SPATIAL TREND ANALYSIS")
-    print("=" * 60)
+    print("\n" + "=" * 65)
+    print("IONA | AUTOCORRELATION AND TREND ANALYSIS")
+    print("=" * 65)
 
-    # --------------------------------------
-    # Carregar dados
-    # --------------------------------------
+    # --------------------------------------------------------
+    # LOAD DATA
+    # --------------------------------------------------------
 
     cube = np.load(CUBE_FILE)
 
@@ -155,30 +249,46 @@ def main():
         END_YEAR + 1
     )
 
-    expected_shape = (288, 25, 25)
+    expected_shape = (
+        len(years) * 12,
+        len(longitude),
+        len(latitude)
+    )
 
     if cube.shape != expected_shape:
         raise ValueError(
-            f"Dimensão inesperada: {cube.shape}"
+            f"Unexpected cube dimensions: {cube.shape}. "
+            f"Expected: {expected_shape}"
         )
 
-    print(f"\nCubo original: {cube.shape}")
+    print(f"\nOriginal cube: {cube.shape}")
 
-    # --------------------------------------
-    # Agregação anual por célula
-    # --------------------------------------
+    # --------------------------------------------------------
+    # ANNUAL AGGREGATION
+    # --------------------------------------------------------
 
-    annual_cube = cube.reshape(
-        24, 12, 25, 25
-    ).sum(axis=1)
-
-    print(
-        f"Cubo anual: {annual_cube.shape}"
+    monthly_cube = cube.reshape(
+        len(years),
+        12,
+        len(longitude),
+        len(latitude)
     )
 
-    # --------------------------------------
-    # Tendência regional agregada
-    # --------------------------------------
+    valid_months = np.isfinite(monthly_cube).sum(axis=1)
+
+    annual_cube = np.nansum(
+        monthly_cube,
+        axis=1
+    )
+
+    # Do not treat incomplete years as complete annual totals.
+    annual_cube[valid_months < 12] = np.nan
+
+    print(f"Annual cube: {annual_cube.shape}")
+
+    # --------------------------------------------------------
+    # AREA-WEIGHTED REGIONAL ANNUAL SERIES
+    # --------------------------------------------------------
 
     weights = np.cos(
         np.deg2rad(latitude)
@@ -193,7 +303,14 @@ def main():
 
     for annual_map in annual_cube:
 
-        valid = np.isfinite(annual_map)
+        valid = (
+            np.isfinite(annual_map)
+            & np.isfinite(weights)
+        )
+
+        if not np.any(valid):
+            regional_annual.append(np.nan)
+            continue
 
         regional_mean = np.average(
             annual_map[valid],
@@ -204,27 +321,24 @@ def main():
 
     regional_annual = np.asarray(regional_annual)
 
-    regional_sen = theilslopes(
+    regional_result = analyze_series(
         regional_annual,
-        years,
-        alpha=0.95
+        years
     )
 
-    regional_mk = kendalltau(
-        years,
-        regional_annual,
-        alternative="two-sided"
-    )
+    if regional_result is None:
+        raise ValueError(
+            "Insufficient valid observations "
+            "for regional analysis."
+        )
 
-    # --------------------------------------
-    # Análise espacial célula por célula
-    # --------------------------------------
+    # --------------------------------------------------------
+    # SPATIAL CELL-BY-CELL ANALYSIS
+    # --------------------------------------------------------
 
-    print("\nCalculando tendências espaciais...\n")
+    print("\nProcessing spatial trends...\n")
 
     results = []
-
-    p_values = []
 
     for i, lon in enumerate(longitude):
 
@@ -232,7 +346,7 @@ def main():
 
             series = annual_cube[:, i, j]
 
-            result = analyze_cell(
+            result = analyze_series(
                 series,
                 years
             )
@@ -248,103 +362,265 @@ def main():
 
             results.append(record)
 
-            p_values.append(result["p_value"])
-
         if (i + 1) % 5 == 0:
             print(
-                f"Colunas processadas: {i + 1}/"
-                f"{len(longitude)}"
+                f"Columns processed: "
+                f"{i + 1}/{len(longitude)}"
             )
 
-    # --------------------------------------
-    # Correção FDR
-    # --------------------------------------
-
-    q_values = benjamini_hochberg(
-        p_values,
-        ALPHA
-    )
-
-    for record, q_value in zip(results, q_values):
-
-        record["q_value"] = float(q_value)
-
-        record["significant_fdr"] = bool(
-            q_value < ALPHA
+    if not results:
+        raise ValueError(
+            "No valid spatial cells were analyzed."
         )
 
-        if record["significant_fdr"]:
-            if record["sen_slope"] > 0:
-                record["trend_class"] = "increasing"
-            elif record["sen_slope"] < 0:
-                record["trend_class"] = "decreasing"
-            else:
-                record["trend_class"] = "neutral"
+    # --------------------------------------------------------
+    # FDR: CONVENTIONAL MANN-KENDALL
+    # --------------------------------------------------------
+
+    raw_p_values = [
+        item["p_value"]
+        for item in results
+    ]
+
+    raw_q_values = benjamini_hochberg(
+        raw_p_values
+    )
+
+    # --------------------------------------------------------
+    # FDR: TFPW
+    # --------------------------------------------------------
+
+    tfpw_p_values = [
+        item["tfpw_p_value"]
+        for item in results
+    ]
+
+    tfpw_q_values = benjamini_hochberg(
+        tfpw_p_values
+    )
+
+    # --------------------------------------------------------
+    # CLASSIFICATION AND COMPARISON
+    # --------------------------------------------------------
+
+    for record, raw_q, tfpw_q in zip(
+        results,
+        raw_q_values,
+        tfpw_q_values
+    ):
+
+        record["q_value"] = float(raw_q)
+
+        record["tfpw_q_value"] = float(tfpw_q)
+
+        raw_significant = (
+            np.isfinite(raw_q)
+            and raw_q < ALPHA
+        )
+
+        tfpw_significant = (
+            np.isfinite(tfpw_q)
+            and tfpw_q < ALPHA
+        )
+
+        record["significant_fdr"] = bool(
+            raw_significant
+        )
+
+        record["significant_tfpw_fdr"] = bool(
+            tfpw_significant
+        )
+
+        if raw_significant and tfpw_significant:
+            comparison = "significant_both"
+
+        elif raw_significant:
+            comparison = "only_conventional"
+
+        elif tfpw_significant:
+            comparison = "only_tfpw"
+
         else:
-            record["trend_class"] = "not_significant"
+            comparison = "not_significant"
 
-    # --------------------------------------
-    # Estatísticas espaciais
-    # --------------------------------------
+        record["test_comparison"] = comparison
 
-    significant = [
+        if comparison == "significant_both":
+            slope = record["sen_slope"]
+
+            if slope > 0:
+                trend_class = "increasing"
+            elif slope < 0:
+                trend_class = "decreasing"
+            else:
+                trend_class = "neutral"
+        else:
+            trend_class = "not_significant"
+
+        record["trend_class"] = trend_class
+
+    # --------------------------------------------------------
+    # SPATIAL SUMMARY
+    # --------------------------------------------------------
+
+    significant_raw = [
         item for item in results
         if item["significant_fdr"]
     ]
 
+    significant_tfpw = [
+        item for item in results
+        if item["significant_tfpw_fdr"]
+    ]
+
+    significant_both = [
+        item for item in results
+        if item["test_comparison"] == "significant_both"
+    ]
+
+    only_conventional = [
+        item for item in results
+        if item["test_comparison"] == "only_conventional"
+    ]
+
+    only_tfpw = [
+        item for item in results
+        if item["test_comparison"] == "only_tfpw"
+    ]
+
     increasing = [
-        item for item in significant
+        item for item in significant_both
         if item["trend_class"] == "increasing"
     ]
 
     decreasing = [
-        item for item in significant
+        item for item in significant_both
         if item["trend_class"] == "decreasing"
     ]
 
-    lag_values = [
-        item["lag1_autocorrelation"]
+    raw_lags = [
+        item["raw_lag1_autocorrelation"]
         for item in results
-        if np.isfinite(item["lag1_autocorrelation"])
+        if np.isfinite(item["raw_lag1_autocorrelation"])
     ]
+
+    residual_lags = [
+        item["residual_lag1_autocorrelation"]
+        for item in results
+        if np.isfinite(
+            item["residual_lag1_autocorrelation"]
+        )
+    ]
+
+    # --------------------------------------------------------
+    # REGIONAL SUMMARY
+    # --------------------------------------------------------
+
+    regional_summary = {
+        "sen_slope_mm_per_year_per_year": (
+            regional_result["sen_slope"]
+        ),
+
+        "sen_ci_95": [
+            regional_result["sen_ci_lower"],
+            regional_result["sen_ci_upper"]
+        ],
+
+        "kendall_tau": regional_result["kendall_tau"],
+        "conventional_p_value": regional_result["p_value"],
+
+        "raw_lag1_autocorrelation": (
+            regional_result["raw_lag1_autocorrelation"]
+        ),
+
+        "residual_lag1_autocorrelation": (
+            regional_result["residual_lag1_autocorrelation"]
+        ),
+
+        "tfpw_kendall_tau": (
+            regional_result["tfpw_kendall_tau"]
+        ),
+
+        "tfpw_p_value": (
+            regional_result["tfpw_p_value"]
+        ),
+
+        "observations": regional_result["observations"]
+    }
+
+    # --------------------------------------------------------
+    # FINAL SUMMARY
+    # --------------------------------------------------------
 
     summary = {
         "period": f"{START_YEAR}-{END_YEAR}",
         "annual_observations_per_cell": 24,
         "total_spatial_cells": len(results),
         "alpha": ALPHA,
-        "regional_trend": {
-            "sen_slope_mm_per_year": float(
-                regional_sen.slope
+
+        "methodology": {
+            "trend_estimator": "Sen's slope",
+            "conventional_test": "Mann-Kendall",
+            "sensitivity_test": (
+                "Trend-Free Pre-Whitening (TFPW)"
             ),
-            "confidence_interval_95": [
-                float(regional_sen.low_slope),
-                float(regional_sen.high_slope)
-            ],
-            "kendall_tau": float(
-                regional_mk.statistic
+            "multiple_testing": (
+                "Benjamini-Hochberg FDR"
             ),
-            "p_value": float(
-                regional_mk.pvalue
+            "regional_weighting": (
+                "Cosine of latitude"
+            ),
+            "annual_aggregation": (
+                "Sum of 12 monthly accumulated values"
             )
         },
+
+        "regional_trend": regional_summary,
+
         "spatial_results": {
-            "significant_cells_fdr": len(significant),
-            "increasing_cells": len(increasing),
-            "decreasing_cells": len(decreasing),
-            "not_significant_cells": (
-                len(results) - len(significant)
+            "conventional_significant_fdr": (
+                len(significant_raw)
             ),
-            "mean_lag1_autocorrelation": (
-                float(np.mean(lag_values))
-                if lag_values else None
+
+            "tfpw_significant_fdr": (
+                len(significant_tfpw)
+            ),
+
+            "significant_in_both_tests": (
+                len(significant_both)
+            ),
+
+            "only_conventional_significant": (
+                len(only_conventional)
+            ),
+
+            "only_tfpw_significant": (
+                len(only_tfpw)
+            ),
+
+            "increasing_cells_robust": len(increasing),
+            "decreasing_cells_robust": len(decreasing),
+
+            "not_significant_in_both": (
+                len(results) - len(significant_raw)
+                - len(only_tfpw)
+            ),
+
+            "mean_raw_lag1_autocorrelation": (
+                float(np.mean(raw_lags))
+                if raw_lags else None
+            ),
+
+            "mean_residual_lag1_autocorrelation": (
+                float(np.mean(residual_lags))
+                if residual_lags else None
             )
         }
     }
 
-    # --------------------------------------
-    # Exportar tendências por célula
-    # --------------------------------------
+    # --------------------------------------------------------
+    # EXPORT CELL RESULTS
+    # --------------------------------------------------------
 
     csv_file = OUTPUT_DIR / "cell_trends.csv"
 
@@ -358,8 +634,15 @@ def main():
         "p_value",
         "q_value",
         "significant_fdr",
+        "raw_lag1_autocorrelation",
+        "residual_lag1_autocorrelation",
+        "tfpw_kendall_tau",
+        "tfpw_p_value",
+        "tfpw_q_value",
+        "tfpw_observations",
+        "significant_tfpw_fdr",
+        "test_comparison",
         "trend_class",
-        "lag1_autocorrelation",
         "observations"
     ]
 
@@ -378,9 +661,9 @@ def main():
         writer.writeheader()
         writer.writerows(results)
 
-    # --------------------------------------
-    # Exportar série regional
-    # --------------------------------------
+    # --------------------------------------------------------
+    # EXPORT REGIONAL SERIES
+    # --------------------------------------------------------
 
     regional_file = (
         OUTPUT_DIR / "regional_annual_series.csv"
@@ -410,11 +693,13 @@ def main():
                 float(value)
             ])
 
-    # --------------------------------------
-    # Exportar resumo
-    # --------------------------------------
+    # --------------------------------------------------------
+    # EXPORT SUMMARY
+    # --------------------------------------------------------
 
-    summary_file = OUTPUT_DIR / "trend_summary.json"
+    summary_file = (
+        OUTPUT_DIR / "trend_summary.json"
+    )
 
     with open(
         summary_file,
@@ -429,70 +714,108 @@ def main():
             ensure_ascii=False
         )
 
-    # --------------------------------------
-    # Relatório no terminal
-    # --------------------------------------
+    # --------------------------------------------------------
+    # TERMINAL REPORT
+    # --------------------------------------------------------
 
-    print("\n" + "=" * 60)
-    print("RESULTADOS DAS TENDÊNCIAS")
-    print("=" * 60)
+    print("\n" + "=" * 65)
+    print("IONA | TREND ANALYSIS RESULTS")
+    print("=" * 65)
 
-    print("\nTENDÊNCIA REGIONAL")
+    print("\nREGIONAL TREND")
 
     print(
         f"Sen's slope: "
-        f"{regional_sen.slope:.3f} mm/ano por ano"
+        f"{regional_result['sen_slope']:.3f} "
+        f"mm/year per year"
     )
 
     print(
-        f"IC 95%: "
-        f"[{regional_sen.low_slope:.3f}, "
-        f"{regional_sen.high_slope:.3f}]"
+        f"95% CI: "
+        f"[{regional_result['sen_ci_lower']:.3f}, "
+        f"{regional_result['sen_ci_upper']:.3f}]"
     )
 
     print(
-        f"Kendall tau: "
-        f"{regional_mk.statistic:.4f}"
+        f"Conventional MK p-value: "
+        f"{regional_result['p_value']:.6f}"
     )
 
     print(
-        f"p-valor: {regional_mk.pvalue:.6f}"
-    )
-
-    print("\nRESULTADOS ESPACIAIS")
-
-    print(f"Células analisadas: {len(results)}")
-
-    print(
-        f"Tendências significativas após FDR: "
-        f"{len(significant)}"
-    )
-
-    print(f"Tendências crescentes: {len(increasing)}")
-    print(f"Tendências decrescentes: {len(decreasing)}")
-
-    print(
-        f"Sem significância após FDR: "
-        f"{len(results) - len(significant)}"
+        f"Residual lag-1 autocorrelation: "
+        f"{regional_result['residual_lag1_autocorrelation']:.4f}"
     )
 
     print(
-        "\nAutocorrelação lag-1 média: "
-        f"{summary['spatial_results']['mean_lag1_autocorrelation']}"
+        f"TFPW MK p-value: "
+        f"{regional_result['tfpw_p_value']:.6f}"
     )
 
-    print("\nARQUIVOS GERADOS")
+    print("\nSPATIAL RESULTS")
+
+    print(f"Cells analyzed: {len(results)}")
+
+    print(
+        f"Conventional MK significant after FDR: "
+        f"{len(significant_raw)}"
+    )
+
+    print(
+        f"TFPW significant after FDR: "
+        f"{len(significant_tfpw)}"
+    )
+
+    print(
+        f"Significant in both tests: "
+        f"{len(significant_both)}"
+    )
+
+    print(
+        f"Only conventional: "
+        f"{len(only_conventional)}"
+    )
+
+    print(
+        f"Only TFPW: "
+        f"{len(only_tfpw)}"
+    )
+
+    print(
+        f"Robust increasing cells: "
+        f"{len(increasing)}"
+    )
+
+    print(
+        f"Robust decreasing cells: "
+        f"{len(decreasing)}"
+    )
+
+    print("\nAUTOCORRELATION DIAGNOSTICS")
+
+    print(
+        f"Mean raw lag-1: "
+        f"{summary['spatial_results']['mean_raw_lag1_autocorrelation']}"
+    )
+
+    print(
+        f"Mean residual lag-1: "
+        f"{summary['spatial_results']['mean_residual_lag1_autocorrelation']}"
+    )
+
+    print("\nOUTPUT FILES")
 
     print(csv_file)
     print(regional_file)
     print(summary_file)
 
-    print("\nAnálise de tendências concluída.")
+    print("\nAnalysis completed.")
 
     print(
-        "\nNOTA: os p-valores do Mann-Kendall são "
-        "preliminares até avaliarmos a autocorrelação "
-        "temporal e a adequação do teste."
+        "\nSCIENTIFIC NOTE: TFPW is being used as a "
+        "sensitivity analysis, not as an unquestionable "
+        "replacement for the conventional test. "
+        "Interpret both results alongside the short "
+        "24-year time series and spatial dependence."
     )
 
 
