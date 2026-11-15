@@ -1,0 +1,127 @@
+{
+  "product": "IONA EARTH-MIND",
+  "version": "2.0",
+  "unit": "calendar_month",
+  "months": [
+    {
+      "month": 1,
+      "observations": 15000,
+      "wet_observations": 15000,
+      "wet_percentage": 100.0,
+      "occurrence_anomalies": 0,
+      "intensity_anomalies": 0,
+      "insufficient_intensity": 0,
+      "no_anomaly_detected": 15000
+    },
+    {
+      "month": 2,
+      "observations": 15000,
+      "wet_observations": 15000,
+      "wet_percentage": 100.0,
+      "occurrence_anomalies": 0,
+      "intensity_anomalies": 281,
+      "insufficient_intensity": 0,
+      "no_anomaly_detected": 14719
+    },
+    {
+      "month": 3,
+      "observations": 15000,
+      "wet_observations": 15000,
+      "wet_percentage": 100.0,
+      "occurrence_anomalies": 0,
+      "intensity_anomalies": 3,
+      "insufficient_intensity": 0,
+      "no_anomaly_detected": 14997
+    },
+    {
+      "month": 4,
+      "observations": 15000,
+      "wet_observations": 14986,
+      "wet_percentage": 99.90666666666667,
+      "occurrence_anomalies": 14,
+      "intensity_anomalies": 96,
+      "insufficient_intensity": 0,
+      "no_anomaly_detected": 14890
+    },
+    {
+      "month": 5,
+      "observations": 15000,
+      "wet_observations": 14230,
+      "wet_percentage": 94.86666666666666,
+      "occurrence_anomalies": 137,
+      "intensity_anomalies": 15,
+      "insufficient_intensity": 0,
+      "no_anomaly_detected": 14848
+    },
+    {
+      "month": 6,
+      "observations": 15000,
+      "wet_observations": 11003,
+      "wet_percentage": 73.35333333333334,
+      "occurrence_anomalies": 63,
+      "intensity_anomalies": 1728,
+      "insufficient_intensity": 1601,
+      "no_anomaly_detected": 11608
+    },
+    {
+      "month": 7,
+      "observations": 15000,
+      "wet_observations": 5007,
+      "wet_percentage": 33.379999999999995,
+      "occurrence_anomalies": 0,
+      "intensity_anomalies": 50,
+      "insufficient_intensity": 3587,
+      "no_anomaly_detected": 11363
+    },
+    {
+      "month": 8,
+      "observations": 15000,
+      "wet_observations": 9886,
+      "wet_percentage": 65.90666666666667,
+      "occurrence_anomalies": 27,
+      "intensity_anomalies": 2347,
+      "insufficient_intensity": 1024,
+      "no_anomaly_detected": 11602
+    },
+    {
+      "month": 9,
+      "observations": 15000,
+      "wet_observations": 14801,
+      "wet_percentage": 98.67333333333333,
+      "occurrence_anomalies": 167,
+      "intensity_anomalies": 9,
+      "insufficient_intensity": 0,
+      "no_anomaly_detected": 14824
+    },
+    {
+      "month": 10,
+      "observations": 15000,
+      "wet_observations": 15000,
+      "wet_percentage": 100.0,
+      "occurrence_anomalies": 0,
+      "intensity_anomalies": 561,
+      "insufficient_intensity": 0,
+      "no_anomaly_detected": 14439
+    },
+    {
+      "month": 11,
+      "observations": 15000,
+      "wet_observations": 15000,
+      "wet_percentage": 100.0,
+      "occurrence_anomalies": 0,
+      "intensity_anomalies": 13,
+      "insufficient_intensity": 0,
+      "no_anomaly_detected": 14987
+    },
+    {
+      "month": 12,
+      "observations": 15000,
+      "wet_observations": 15000,
+      "wet_percentage": 100.0,
+      "occurrence_anomalies": 0,
+      "intensity_anomalies": 182,
+      "insufficient_intensity": 0,
+      "no_anomaly_detected": 14818
+    }
+  ]
+}
