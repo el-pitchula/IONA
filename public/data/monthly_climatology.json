@@ -1,0 +1,94 @@
+{
+  "metadata": {
+    "period": "2001-2024",
+    "variable": "monthly_precipitation_climatology",
+    "unit": "mm/month",
+    "months": 12
+  },
+  "data": [
+    {
+      "month": 1,
+      "mean_precipitation_mm": 221.450133599339,
+      "std_precipitation_mm": 102.06235995672566,
+      "minimum_mm": 56.610142138115705,
+      "maximum_mm": 437.58570896375164
+    },
+    {
+      "month": 2,
+      "mean_precipitation_mm": 182.95473821634346,
+      "std_precipitation_mm": 81.89432894125987,
+      "minimum_mm": 78.75581497808497,
+      "maximum_mm": 418.84655948573754
+    },
+    {
+      "month": 3,
+      "mean_precipitation_mm": 200.35233756035805,
+      "std_precipitation_mm": 72.87301795657457,
+      "minimum_mm": 45.86029792738645,
+      "maximum_mm": 314.6100840249659
+    },
+    {
+      "month": 4,
+      "mean_precipitation_mm": 97.17822178118404,
+      "std_precipitation_mm": 53.772760827436,
+      "minimum_mm": 5.578484380457813,
+      "maximum_mm": 236.47368782796917
+    },
+    {
+      "month": 5,
+      "mean_precipitation_mm": 18.59825799250617,
+      "std_precipitation_mm": 13.644339892840803,
+      "minimum_mm": 0.4277936472373019,
+      "maximum_mm": 45.17680332253986
+    },
+    {
+      "month": 6,
+      "mean_precipitation_mm": 2.4902865862579198,
+      "std_precipitation_mm": 3.1208091139401644,
+      "minimum_mm": 0.1482683155379446,
+      "maximum_mm": 10.974128247786789
+    },
+    {
+      "month": 7,
+      "mean_precipitation_mm": 0.559911835136259,
+      "std_precipitation_mm": 0.7591847424358,
+      "minimum_mm": 0.008362212698940516,
+      "maximum_mm": 2.753533565591508
+    },
+    {
+      "month": 8,
+      "mean_precipitation_mm": 6.760862328535251,
+      "std_precipitation_mm": 10.98983911108023,
+      "minimum_mm": 0.06798161253007455,
+      "maximum_mm": 40.36652189589902
+    },
+    {
+      "month": 9,
+      "mean_precipitation_mm": 24.32913870376447,
+      "std_precipitation_mm": 17.646589180933884,
+      "minimum_mm": 1.288488190272063,
+      "maximum_mm": 57.944799130788574
+    },
+    {
+      "month": 10,
+      "mean_precipitation_mm": 109.17880869817242,
+      "std_precipitation_mm": 68.9174626390965,
+      "minimum_mm": 22.836381698108834,
+      "maximum_mm": 282.09815635761896
+    },
+    {
+      "month": 11,
+      "mean_precipitation_mm": 230.44016972007435,
+      "std_precipitation_mm": 58.638257447802985,
+      "minimum_mm": 94.22951333432687,
+      "maximum_mm": 337.7603863058806
+    },
+    {
+      "month": 12,
+      "mean_precipitation_mm": 243.02845718109197,
+      "std_precipitation_mm": 78.1745743703891,
+      "minimum_mm": 95.75201728771854,
+      "maximum_mm": 403.7672296419459
+    }
+  ]
+}

@@ -1,0 +1,123 @@
+{
+  "project": "IONA",
+  "version": "1.0.0",
+  "research_question": "Does the average precipitation in the Brazilian Cerrado hide opposing regional trends?",
+  "study_area": {
+    "name": "DF and surrounding pilot region",
+    "west": -48.5,
+    "south": -16.5,
+    "east": -46.0,
+    "north": -14.0,
+    "is_official_cerrado_polygon": false
+  },
+  "dataset": {
+    "product": "GPM_3IMERGM",
+    "version": "V07B",
+    "period": "2001-2024",
+    "months": 288,
+    "spatial_cells": 625,
+    "resolution_degrees": 0.1,
+    "doi": "10.5067/GPM/IMERG/3B-MONTH/07"
+  },
+  "regional_trend": {
+    "sen_slope_mm_per_year_per_year": -11.04813588233351,
+    "sen_ci_95": [
+      -27.678688166118416,
+      5.828199362357736
+    ],
+    "kendall_tau": -0.21739130434782608,
+    "conventional_p_value": 0.1446229127420921,
+    "raw_lag1_autocorrelation": 0.20512978239848997,
+    "residual_lag1_autocorrelation": 0.07486935839033736,
+    "tfpw_kendall_tau": -0.25691699604743085,
+    "tfpw_p_value": 0.09111144691872144,
+    "observations": 24
+  },
+  "spatial_results": {
+    "conventional_significant_fdr": 0,
+    "tfpw_significant_fdr": 0,
+    "significant_in_both_tests": 0,
+    "only_conventional_significant": 0,
+    "only_tfpw_significant": 0,
+    "increasing_cells_robust": 0,
+    "decreasing_cells_robust": 0,
+    "not_significant_in_both": 625,
+    "mean_raw_lag1_autocorrelation": 0.19395940057548894,
+    "mean_residual_lag1_autocorrelation": 0.07491346123944133
+  },
+  "spatial_autocorrelation": {
+    "method": "Global Moran's I",
+    "weights": "Queen contiguity (8 neighbors)",
+    "permutations": 9999,
+    "seed": 42,
+    "observed_moran_i": 0.8529846449061327,
+    "expected_moran_i": -0.0016025641025641025,
+    "p_positive": 0.0001,
+    "p_two_sided": 0.0001,
+    "interpretation": "Positive spatial autocorrelation detected",
+    "variable": "Sen's slope",
+    "cells": 625
+  },
+  "local_spatial_analysis": {
+    "method": "Local Moran's I (LISA)",
+    "weights": "Queen contiguity, binary",
+    "permutations": 9999,
+    "random_seed": 42,
+    "fdr_method": "Benjamini-Hochberg",
+    "alpha": 0.05,
+    "cells": 625,
+    "significant_cells": 322,
+    "cluster_counts": {
+      "high-high": 136,
+      "low-low": 186,
+      "high-low": 0,
+      "low-high": 0,
+      "not_significant": 303
+    }
+  },
+  "cluster_contrast": {
+    "comparison": "high-high minus low-low",
+    "n_high_high": 136,
+    "n_low_low": 186,
+    "mean_high_high": -5.9633238587649116,
+    "mean_low_low": -13.896561252126826,
+    "median_high_high": -6.465478555153444,
+    "median_low_low": -13.921790448912745,
+    "mean_difference": 7.933237393361915,
+    "permutation_p_value": 0.0001,
+    "permutations": 9999,
+    "seed": 42,
+    "interpretation": "Exploratory contrast; permutation test does not account for spatial dependence or data-driven LISA grouping."
+  },
+  "robustness": {
+    "queen": {
+      "weights": "Queen",
+      "global_moran_i": 0.8529846449061323,
+      "global_expected_i": -0.0016025641025641025,
+      "global_p_value": 0.0001,
+      "significant_cells_fdr": 322,
+      "high_high": 136,
+      "low_low": 186,
+      "high_low": 0,
+      "low_high": 0,
+      "not_significant": 303
+    },
+    "rook": {
+      "weights": "Rook",
+      "global_moran_i": 0.8834033590898618,
+      "global_expected_i": -0.0016025641025641025,
+      "global_p_value": 0.0001,
+      "significant_cells_fdr": 139,
+      "high_high": 43,
+      "low_low": 96,
+      "high_low": 0,
+      "low_high": 0,
+      "not_significant": 486
+    },
+    "classification_agreement": 0.7072,
+    "significant_cluster_jaccard": 0.43167701863354035,
+    "high_high_jaccard": 0.3161764705882353,
+    "low_low_jaccard": 0.5161290322580645,
+    "interpretation": "Sensitivity analysis comparing spatial classifications under Queen and Rook contiguity. Agreement measures classification stability, not temporal trend significance."
+  }
+}

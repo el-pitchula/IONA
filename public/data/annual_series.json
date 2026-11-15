@@ -1,0 +1,106 @@
+{
+  "metadata": {
+    "period": "2001-2024",
+    "variable": "annual_precipitation",
+    "unit": "mm",
+    "aggregation": "Sum of monthly accumulated precipitation from the cosine-latitude weighted regional series"
+  },
+  "data": [
+    {
+      "year": 2001,
+      "precipitation_mm": 1237.8434726742578
+    },
+    {
+      "year": 2002,
+      "precipitation_mm": 1261.6142504723139
+    },
+    {
+      "year": 2003,
+      "precipitation_mm": 1261.4010554341621
+    },
+    {
+      "year": 2004,
+      "precipitation_mm": 1742.55449613891
+    },
+    {
+      "year": 2005,
+      "precipitation_mm": 1743.1509612310529
+    },
+    {
+      "year": 2006,
+      "precipitation_mm": 1592.0660399868682
+    },
+    {
+      "year": 2007,
+      "precipitation_mm": 1090.2843428949354
+    },
+    {
+      "year": 2008,
+      "precipitation_mm": 1561.479243718465
+    },
+    {
+      "year": 2009,
+      "precipitation_mm": 1702.2411838451915
+    },
+    {
+      "year": 2010,
+      "precipitation_mm": 1343.7112389750102
+    },
+    {
+      "year": 2011,
+      "precipitation_mm": 1425.7992646692408
+    },
+    {
+      "year": 2012,
+      "precipitation_mm": 1119.645017759736
+    },
+    {
+      "year": 2013,
+      "precipitation_mm": 1458.5340207717372
+    },
+    {
+      "year": 2014,
+      "precipitation_mm": 1242.7558035743173
+    },
+    {
+      "year": 2015,
+      "precipitation_mm": 1044.9150875661887
+    },
+    {
+      "year": 2016,
+      "precipitation_mm": 1116.5752896936128
+    },
+    {
+      "year": 2017,
+      "precipitation_mm": 1086.426287542771
+    },
+    {
+      "year": 2018,
+      "precipitation_mm": 1348.8240458695282
+    },
+    {
+      "year": 2019,
+      "precipitation_mm": 1060.0450524718353
+    },
+    {
+      "year": 2020,
+      "precipitation_mm": 1502.4450938373375
+    },
+    {
+      "year": 2021,
+      "precipitation_mm": 1471.618780904202
+    },
+    {
+      "year": 2022,
+      "precipitation_mm": 1161.2449903665722
+    },
+    {
+      "year": 2023,
+      "precipitation_mm": 993.6476100792515
+    },
+    {
+      "year": 2024,
+      "precipitation_mm": 1526.8891503888249
+    }
+  ]
+}

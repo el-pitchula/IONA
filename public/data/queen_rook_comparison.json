@@ -1,0 +1,31 @@
+{
+  "queen": {
+    "weights": "Queen",
+    "global_moran_i": 0.8529846449061323,
+    "global_expected_i": -0.0016025641025641025,
+    "global_p_value": 0.0001,
+    "significant_cells_fdr": 322,
+    "high_high": 136,
+    "low_low": 186,
+    "high_low": 0,
+    "low_high": 0,
+    "not_significant": 303
+  },
+  "rook": {
+    "weights": "Rook",
+    "global_moran_i": 0.8834033590898618,
+    "global_expected_i": -0.0016025641025641025,
+    "global_p_value": 0.0001,
+    "significant_cells_fdr": 139,
+    "high_high": 43,
+    "low_low": 96,
+    "high_low": 0,
+    "low_high": 0,
+    "not_significant": 486
+  },
+  "classification_agreement": 0.7072,
+  "significant_cluster_jaccard": 0.43167701863354035,
+  "high_high_jaccard": 0.3161764705882353,
+  "low_low_jaccard": 0.5161290322580645,
+  "interpretation": "Sensitivity analysis comparing spatial classifications under Queen and Rook contiguity. Agreement measures classification stability, not temporal trend significance."
+}

@@ -1,0 +1,36 @@
+{
+  "dataset": {
+    "period": "2001-2024",
+    "expected_months": 288,
+    "observations": 180000,
+    "valid_observations": 180000,
+    "missing_observations": 0,
+    "zero_observations": 20087,
+    "zero_percentage": 11.159444444444444
+  },
+  "distribution": {
+    "total_observations": 180000,
+    "valid_observations": 180000,
+    "zero_observations": 20087,
+    "zero_percentage": 11.159444444444444,
+    "mean": 111.450212036233,
+    "median": 75.6000030040741,
+    "standard_deviation": 112.80982106787589,
+    "percentile_95": 316.94402146339417,
+    "percentile_99": 394.32002305984497,
+    "minimum": 0.0,
+    "maximum": 555.0240383148193
+  },
+  "source": {
+    "provider": "NASA",
+    "product": "GPM IMERG Monthly Final Run",
+    "short_name": "GPM_3IMERGM",
+    "version": "V07B",
+    "doi": "10.5067/GPM/IMERG/3B-MONTH/07"
+  },
+  "processing": {
+    "source_unit": "mm/hr",
+    "accumulation_conversion": "monthly_mean_rate_mm_hr * 24 * days_in_month",
+    "spatial_weighting": "cosine of latitude"
+  }
+}
