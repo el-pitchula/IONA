@@ -1,0 +1,22 @@
+/* Ajustes de integração para bases Vite ou layouts IONA anteriores. */
+:root{color-scheme:dark;font-family:Manrope,"Segoe UI",sans-serif;background:#071018;color:#eaf3f6}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;min-width:320px;background:#071018;color:#eaf3f6}
+#root{width:100%;max-width:none;min-height:100vh;margin:0;border:0;text-align:left;display:block}
+.iona-app-shell{display:grid;grid-template-columns:244px minmax(0,1fr);width:100%;min-height:100vh;align-items:start;background:#071018}
+.iona-app-main{width:100%;min-width:0;max-width:1800px;margin:0 auto;padding:26px clamp(18px,3vw,54px) 48px}
+.iona-topbar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:13px;margin:0 0 25px}
+.iona-breadcrumb{font-size:10px;letter-spacing:.9px;color:#91aabb;font-weight:600}
+.iona-breadcrumb strong{color:#61e0c0}
+.iona-topbar-badges{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.iona-environment,.iona-data-source{border:1px solid #294754;border-radius:30px;padding:8px 11px;color:#c9d7dd;background:#10212c;font:10px monospace}
+.iona-data-source{color:#61e0c0;border-color:#2b5b55}
+.iona-overview{scroll-margin-top:14px;min-width:0}
+.iona-overview .iona-hero{width:100%}
+.iona-sidebar__link{text-decoration:none}
+.iona-nav-close{display:none;margin-left:auto;color:#fff;background:#17313d;border:1px solid #335260;border-radius:6px;width:30px;height:30px;font-size:21px}
+.iona-science-panel .iona-precip-chart{overflow:hidden}
+@media(max-width:820px){.iona-app-shell{display:block}.iona-app-main{padding:76px 17px 32px}.iona-nav-close{display:block}}
+@media(max-width:560px){.iona-app-main{padding:76px 12px 26px}.iona-topbar{align-items:flex-start;flex-direction:column}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}

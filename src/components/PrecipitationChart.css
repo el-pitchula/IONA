@@ -1,5 +1,4 @@
 
-/* IONA | Scientific Precipitation Visualization */
 
 section[aria-labelledby="precipitation-title"] {
   background: linear-gradient(
@@ -59,7 +58,6 @@ section[aria-labelledby="precipitation-title"] tbody tr:hover {
   background: rgba(97, 224, 192, 0.07);
 }
 
-/* Base para o futuro gráfico interativo */
 
 .iona-precip-chart {
   width: 100%;

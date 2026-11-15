@@ -1,30 +1,26 @@
-
-import PrecipitationChart from './components/PrecipitationChart'
+import IONASidebar from "./components/IONASidebar";
+import OrbitalHero from "./components/OrbitalHero";
+import ScientificWorkspace from "./components/ScientificWorkspace";
+import "./App.css";
+import "./AppShellFinal.css";
 
 function App() {
   return (
-    <main style={{
-      maxWidth: '1200px',
-      margin: '0 auto',
-      padding: '40px 24px',
-      textAlign: 'left'
-    }}>
-      <header style={{ marginBottom: '32px' }}>
-        <p style={{ color: '#61e0c0' }}>
-          IONA / EARTH INTELLIGENCE
-        </p>
-
-        <h1>Descubra o que as médias escondem.</h1>
-
-        <p>
-          Plataforma de investigação ambiental utilizando
-          dados científicos da NASA.
-        </p>
-      </header>
-
-      <PrecipitationChart />
-    </main>
-  )
+    <div className="iona-app-shell">
+      <IONASidebar />
+      <main className="iona-app-main">
+        <header className="iona-topbar">
+          <div className="iona-breadcrumb">IONA / <strong>PAINEL DE EXPLORAÇÃO</strong></div>
+          <div className="iona-topbar-badges">
+            <span className="iona-environment">MVP · ESTUDO PILOTO</span>
+            <span className="iona-data-source">NASA GPM IMERG</span>
+          </div>
+        </header>
+        <div id="overview" className="iona-overview"><OrbitalHero /></div>
+        <ScientificWorkspace />
+      </main>
+    </div>
+  );
 }
 
-export default App
+export default App;
