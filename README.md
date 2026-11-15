@@ -1,85 +1,75 @@
-# IONA
-### Earth Intelligence & Pattern Discovery
+# React + TypeScript + Vite
 
-**NASA Space Apps Challenge 2026**
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-> Revealing what the averages hide.
+Currently, two official plugins are available:
 
-## Overview
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-IONA is a scientific exploration platform designed to investigate spatial and temporal patterns in Earth's systems using NASA Earth Science data.
+## React Compiler
 
-The project explores how regional averages can conceal opposing local trends, potentially hiding important environmental changes.
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-### Initial Research Question
+## Expanding the ESLint configuration
 
-**Does the average precipitation in the Brazilian Cerrado hide opposing regional trends?**
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 
-## The Problem
+```js
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
 
-Regional averages are useful, but they can hide important spatial differences.
+      // Remove tseslint.configs.recommended and replace with this
+      tseslint.configs.recommendedTypeChecked,
+      // Alternatively, use this for stricter rules
+      tseslint.configs.strictTypeChecked,
+      // Optionally, add this for stylistic rules
+      tseslint.configs.stylisticTypeChecked,
 
-For example, an overall precipitation trend may appear stable even when some areas are becoming wetter while others are becoming drier.
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 
-IONA aims to make these differences visible, measurable, and scientifically interpretable.
+```
 
-## Project Goals
+You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
 
-- Explore NASA Earth Science datasets.
-- Visualize temporal and spatial changes.
-- Estimate trends and evaluate statistical significance.
-- Compare local patterns with regional averages.
-- Identify anomalies and group regions with similar behavior.
-- Generate evidence-based explanations of the results.
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
 
-## Main Modules
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs['recommended-typescript'],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 
-| Module | Purpose |
-|---|---|
-| **Earth Explorer** | Explore datasets, variables, regions, and time periods. |
-| **Trend Laboratory** | Calculate trends, magnitudes, and statistical significance. |
-| **Pattern Detective** | Reveal spatial differences hidden by regional averages. |
-| **EARTH-MIND** | Apply machine learning to identify anomalies and behavioral patterns. |
-| **Evidence Report** | Present findings, methods, data sources, and limitations. |
-
-## Data Sources
-
-Candidate NASA data sources include:
-
-- [NASA GPM](https://gpm.nasa.gov/data) — precipitation observations.
-- [NASA GES DISC](https://disc.gsfc.nasa.gov/) — Earth science data access.
-- [NASA Earthdata Search](https://search.earthdata.nasa.gov/) — dataset discovery.
-- [NASA POWER](https://power.larc.nasa.gov/) — access to environmental data products.
-- [MERRA-2](https://gmao.gsfc.nasa.gov/reanalysis/MERRA-2/) — atmospheric reanalysis.
-
-**Note:** The final dataset, product version, temporal coverage, spatial resolution, and units will be documented after data validation.
-
-## Methodology
-
-The planned scientific workflow includes:
-
-1. Data acquisition and quality assessment.
-2. Data cleaning and preprocessing.
-3. Temporal trend analysis.
-4. Spatial comparison and visualization.
-5. Statistical significance assessment.
-6. Machine learning for anomaly detection and regional clustering.
-7. Scientific interpretation and evidence reporting.
-
-Potential statistical methods include:
-
-- Linear Regression
-- Mann–Kendall Test
-- Sen's Slope
-- False Discovery Rate (FDR) correction
-
-## Technology Stack
-
-| Area | Technologies |
-|---|---|
-| Data Analysis | Python, NumPy, Pandas, SciPy |
-| Geospatial Analysis | xarray, GeoPandas |
-| Machine Learning | Scikit-learn |
-| Frontend | React, TypeScript |
-| Visualization | Plotly, Interactive Maps |
-| Version Control | Git, GitHub |
+```

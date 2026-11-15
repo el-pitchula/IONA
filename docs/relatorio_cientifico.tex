@@ -21,6 +21,9 @@
 \usepackage{xcolor}
 \usepackage{longtable}
 
+% Caminho das figuras, relativo a este arquivo .tex
+\graphicspath{{figuras/}}
+
 \geometry{
     left=2.5cm,
     right=2.5cm,
@@ -490,6 +493,43 @@ Dezembro & 243.03 \\
 \end{tabular}
 \end{table}
 
+A Figura \ref{fig:monthly-climatology} apresenta
+a distribuição da precipitação média entre os
+meses do ano. O contraste entre os períodos úmido
+e seco evidencia a sazonalidade característica
+da região-piloto.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]
+    {02_monthly_climatology.png}
+    \caption{Climatologia mensal da precipitação
+    acumulada média na região-piloto, entre 2001 e 2024.
+    Valores expressos em mm/mês.}
+    \label{fig:monthly-climatology}
+\end{figure}
+
+\subsection{Variabilidade interanual}
+
+A série anual regional permite observar a variação
+dos acumulados entre os anos de 2001 e 2024.
+
+A Figura \ref{fig:annual-precipitation} apresenta
+essa evolução temporal. A variabilidade interanual
+é expressiva, reforçando a necessidade de avaliar
+tendências com métodos estatísticos apropriados,
+em vez de interpretar diferenças entre anos
+isolados como mudanças persistentes.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]
+    {01_annual_precipitation.png}
+    \caption{Precipitação anual regional na região-piloto,
+    entre 2001 e 2024.}
+    \label{fig:annual-precipitation}
+\end{figure}
+
 \subsection{Tendência regional}
 
 A estimativa regional de Sen foi:
@@ -566,6 +606,23 @@ setor noroeste da região-piloto.
 
 Entretanto, nenhuma dessas células apresentou
 significância temporal após FDR.
+
+A Figura \ref{fig:spatial-sen} apresenta a
+distribuição geográfica das inclinações estimadas.
+A escala de cores representa a magnitude e o sinal
+das estimativas, não sua significância estatística.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]
+    {03_spatial_sen_trends.png}
+    \caption{Distribuição espacial das estimativas
+    de inclinação de Sen nas 625 células da região-piloto.
+    Valores negativos e positivos representam direções
+    distintas das estimativas, sem implicar significância
+    estatística individual.}
+    \label{fig:spatial-sen}
+\end{figure}
 
 \subsection{Spatial Trend Cancellation Index}
 
@@ -648,6 +705,25 @@ inclinações negativas. Portanto, os agrupamentos
 separam principalmente magnitudes relativas,
 e não direções temporais opostas.
 
+A Figura \ref{fig:lisa-queen} apresenta a
+classificação espacial dos agrupamentos LISA
+obtidos com a matriz Queen. As células não
+significativas são representadas separadamente
+dos agrupamentos identificados após FDR.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]
+    {04_lisa_clusters_queen.png}
+    \caption{Agrupamentos locais de autocorrelação
+    espacial (LISA) com contiguidade Queen.
+    HH e LL indicam associação espacial de valores
+    relativamente altos e baixos das estimativas de Sen.
+    A classificação não representa a direção ou a
+    significância temporal das tendências.}
+    \label{fig:lisa-queen}
+\end{figure}
+
 \subsection{Contraste HH versus LL}
 
 A comparação exploratória apresentou:
@@ -719,6 +795,24 @@ espacial geral é consistente.
 
 Entretanto, a delimitação dos agrupamentos locais
 apresentou sensibilidade à definição de vizinhança.
+
+A Figura \ref{fig:queen-rook} permite comparar
+visualmente as classificações obtidas com as
+duas matrizes. A diferença entre os mapas reforça
+que a identificação de agrupamentos locais depende
+da estrutura de vizinhança adotada.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]
+    {05_queen_vs_rook.png}
+    \caption{Comparação das classificações LISA
+    obtidas com contiguidade Queen e Rook.
+    A alteração da definição de vizinhança modifica
+    a quantidade e a delimitação dos agrupamentos
+    locais identificados.}
+    \label{fig:queen-rook}
+\end{figure}
 
 Assim, os agrupamentos LISA devem ser apresentados
 como resultados exploratórios, e não como
