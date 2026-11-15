@@ -1,24 +1,45 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
 # Python
+.venv/
 __pycache__/
 *.py[cod]
-.venv/
-venv/
-.env
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 
-# Jupyter
-.ipynb_checkpoints/
+# Scientific data - keep locally, do not commit
+data/raw/
+data/processed/
 
-# Dados científicos baixados
-data/raw/*
-data/processed/*
+# Build and generated files
+dist/
+coverage/
 
-# Manter arquivos de referência
-!data/raw/.gitkeep
-!data/processed/.gitkeep
-
-# Sistema operacional
-.DS_Store
+# Temporary and system files
+*.tmp
+*.bak
 Thumbs.db
-
-# VS Code
-.vscode/

@@ -1,0 +1,21 @@
+{
+  "project": "IONA",
+  "version": "1.0.0",
+  "description": "Earth Intelligence & Pattern Discovery",
+  "period": "2001-2024",
+  "generated_datasets": [
+    "overview.json",
+    "annual_series.json",
+    "monthly_climatology.json",
+    "spatial_cells.geojson",
+    "queen_rook_comparison.json",
+    "data_quality.json"
+  ],
+  "spatial_cells": 625,
+  "source": {
+    "provider": "NASA GPM",
+    "product": "3IMERGM",
+    "version": "V07B",
+    "doi": "10.5067/GPM/IMERG/3B-MONTH/07"
+  }
+}
