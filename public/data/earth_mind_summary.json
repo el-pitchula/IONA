@@ -1,0 +1,213 @@
+{
+  "product": "IONA EARTH-MIND",
+  "version": "2.0",
+  "description": "Two-part statistical anomaly detection for precipitation occurrence and intensity.",
+  "period": {
+    "start": "2001-01-01",
+    "end": "2024-12-01",
+    "years": 24,
+    "months": 288
+  },
+  "spatial_coverage": {
+    "cells": 625,
+    "longitude_min": -48.45000076293945,
+    "longitude_max": -46.04999923706055,
+    "latitude_min": -16.44999885559082,
+    "latitude_max": -14.049999237060547
+  },
+  "observations": {
+    "total": 180000,
+    "wet": 159913,
+    "dry": 20087
+  },
+  "anomalies": {
+    "total": 5693,
+    "occurrence": 408,
+    "intensity": 5285,
+    "combined_classes": {
+      "no_anomaly_detected": 168095,
+      "insufficient_intensity_evidence": 6212,
+      "intensity_anomaly": 5285,
+      "occurrence_anomaly": 408
+    }
+  },
+  "methodology": {
+    "reference": "Leave-one-year-out, same calendar month",
+    "occurrence_model": "Jeffreys-smoothed Beta-Binomial predictive probability",
+    "occurrence_threshold": 0.05,
+    "intensity_model": "Median and MAD robust anomaly score",
+    "intensity_threshold": 3.5,
+    "minimum_wet_reference_years": 8,
+    "multiple_testing_correction": false
+  },
+  "limitations": [
+    "The occurrence threshold is operational and is not a multiple-testing-adjusted hypothesis test.",
+    "Detected anomalies are statistical candidates, not independently confirmed extreme weather events.",
+    "Insufficient evidence is kept separate from normal observations."
+  ],
+  "source_summary": {
+    "project": "IONA",
+    "module": "EARTH-MIND",
+    "version": "2.0",
+    "method": "Two-part occurrence and conditional intensity detection",
+    "observations": 180000,
+    "spatial_cells": 625,
+    "years": [
+      2001,
+      2024
+    ],
+    "parameters": {
+      "minimum_wet_reference_years": 8,
+      "robust_z_threshold": 3.5,
+      "occurrence_predictive_probability_threshold": 0.05,
+      "beta_prior": {
+        "alpha": 0.5,
+        "beta": 0.5
+      },
+      "reference_strategy": "leave-one-year-out",
+      "intensity_reference": "positive precipitation only"
+    },
+    "counts": {
+      "wet_observations": 159913,
+      "occurrence_anomalies": 408,
+      "intensity_anomalies": 5285,
+      "combined_classes": {
+        "no_anomaly_detected": 168095,
+        "insufficient_intensity_evidence": 6212,
+        "intensity_anomaly": 5285,
+        "occurrence_anomaly": 408
+      }
+    },
+    "occurrence_class_distribution": {
+      "normal_occurrence": 179592,
+      "unusual_dry_occurrence": 408
+    },
+    "intensity_class_distribution": {
+      "normal_intensity": 148416,
+      "not_applicable": 20087,
+      "high_intensity_anomaly": 5273,
+      "insufficient_dispersion": 3528,
+      "insufficient_sample": 2684,
+      "low_intensity_anomaly": 12
+    },
+    "monthly_diagnostics": [
+      {
+        "month": 1,
+        "observations": 15000,
+        "wet_observations": 15000,
+        "occurrence_anomalies": 0,
+        "intensity_anomalies": 0,
+        "insufficient_intensity": 0,
+        "wet_percentage": 100.0
+      },
+      {
+        "month": 2,
+        "observations": 15000,
+        "wet_observations": 15000,
+        "occurrence_anomalies": 0,
+        "intensity_anomalies": 281,
+        "insufficient_intensity": 0,
+        "wet_percentage": 100.0
+      },
+      {
+        "month": 3,
+        "observations": 15000,
+        "wet_observations": 15000,
+        "occurrence_anomalies": 0,
+        "intensity_anomalies": 3,
+        "insufficient_intensity": 0,
+        "wet_percentage": 100.0
+      },
+      {
+        "month": 4,
+        "observations": 15000,
+        "wet_observations": 14986,
+        "occurrence_anomalies": 14,
+        "intensity_anomalies": 96,
+        "insufficient_intensity": 0,
+        "wet_percentage": 99.90666666666667
+      },
+      {
+        "month": 5,
+        "observations": 15000,
+        "wet_observations": 14230,
+        "occurrence_anomalies": 137,
+        "intensity_anomalies": 15,
+        "insufficient_intensity": 0,
+        "wet_percentage": 94.86666666666666
+      },
+      {
+        "month": 6,
+        "observations": 15000,
+        "wet_observations": 11003,
+        "occurrence_anomalies": 63,
+        "intensity_anomalies": 1728,
+        "insufficient_intensity": 1601,
+        "wet_percentage": 73.35333333333334
+      },
+      {
+        "month": 7,
+        "observations": 15000,
+        "wet_observations": 5007,
+        "occurrence_anomalies": 0,
+        "intensity_anomalies": 50,
+        "insufficient_intensity": 3587,
+        "wet_percentage": 33.379999999999995
+      },
+      {
+        "month": 8,
+        "observations": 15000,
+        "wet_observations": 9886,
+        "occurrence_anomalies": 27,
+        "intensity_anomalies": 2347,
+        "insufficient_intensity": 1024,
+        "wet_percentage": 65.90666666666667
+      },
+      {
+        "month": 9,
+        "observations": 15000,
+        "wet_observations": 14801,
+        "occurrence_anomalies": 167,
+        "intensity_anomalies": 9,
+        "insufficient_intensity": 0,
+        "wet_percentage": 98.67333333333333
+      },
+      {
+        "month": 10,
+        "observations": 15000,
+        "wet_observations": 15000,
+        "occurrence_anomalies": 0,
+        "intensity_anomalies": 561,
+        "insufficient_intensity": 0,
+        "wet_percentage": 100.0
+      },
+      {
+        "month": 11,
+        "observations": 15000,
+        "wet_observations": 15000,
+        "occurrence_anomalies": 0,
+        "intensity_anomalies": 13,
+        "insufficient_intensity": 0,
+        "wet_percentage": 100.0
+      },
+      {
+        "month": 12,
+        "observations": 15000,
+        "wet_observations": 15000,
+        "occurrence_anomalies": 0,
+        "intensity_anomalies": 182,
+        "insufficient_intensity": 0,
+        "wet_percentage": 100.0
+      }
+    ],
+    "methodological_notes": [
+      "Occurrence and intensity are evaluated separately.",
+      "Occurrence uses a Jeffreys-smoothed Beta-Binomial posterior predictive probability.",
+      "Intensity uses positive historical observations only.",
+      "Intensity references with fewer than the minimum sample are not classified.",
+      "Zero-MAD intensity references are not classified as anomalies.",
+      "Anomaly thresholds are operational criteria, not proof of physical extremes.",
+      "Spatial coherence is not evaluated in this version."
+    ]
+  }
+}

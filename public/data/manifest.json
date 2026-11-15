@@ -17,5 +17,14 @@
     "product": "3IMERGM",
     "version": "V07B",
     "doi": "10.5067/GPM/IMERG/3B-MONTH/07"
+  },
+  "earth_mind_v2": {
+    "version": "2.0",
+    "summary": "earth_mind_summary.json",
+    "monthly": "earth_mind_monthly.json",
+    "anomalies_geojson": "earth_mind_anomalies.geojson",
+    "anomaly_features": 5693,
+    "period_start": "2001-01-01",
+    "period_end": "2024-12-01"
   }
 }
