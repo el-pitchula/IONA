@@ -1,0 +1,93 @@
+
+/* IONA | Scientific Precipitation Visualization */
+
+section[aria-labelledby="precipitation-title"] {
+  background: linear-gradient(
+    145deg,
+    #102633 0%,
+    #0b1723 100%
+  );
+  border: 1px solid #294452;
+  border-radius: 18px;
+  padding: clamp(20px, 3vw, 32px);
+  color: #eaf5f6;
+  width: 100%;
+  box-sizing: border-box;
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.15);
+}
+
+#precipitation-title {
+  font-size: clamp(20px, 2.5vw, 27px);
+  font-weight: 700;
+  margin: 0 0 10px;
+  letter-spacing: -0.5px;
+}
+
+section[aria-labelledby="precipitation-title"] > p {
+  color: #9db8c6;
+  font-size: 13px;
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+
+/* Tabela científica temporária */
+
+section[aria-labelledby="precipitation-title"] table {
+  width: 100%;
+  min-width: 340px;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+section[aria-labelledby="precipitation-title"] th {
+  color: #61e0c0;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 14px;
+  text-align: left;
+  border-bottom: 1px solid #35515d;
+}
+
+section[aria-labelledby="precipitation-title"] td {
+  padding: 12px 14px;
+  color: #c3d6df;
+  border-bottom: 1px solid rgba(120, 160, 175, 0.12);
+}
+
+section[aria-labelledby="precipitation-title"] tbody tr:hover {
+  background: rgba(97, 224, 192, 0.07);
+}
+
+/* Base para o futuro gráfico interativo */
+
+.iona-precip-chart {
+  width: 100%;
+  min-height: 280px;
+  margin-top: 24px;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.iona-precip-chart svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Responsividade */
+
+@media (max-width: 600px) {
+  section[aria-labelledby="precipitation-title"] {
+    padding: 18px 14px;
+    border-radius: 14px;
+  }
+
+  #precipitation-title {
+    font-size: 20px;
+  }
+
+  .iona-precip-chart {
+    min-height: 220px;
+  }
+}

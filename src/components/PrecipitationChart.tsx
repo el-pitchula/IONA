@@ -1,5 +1,9 @@
 
 import { useEffect, useState } from "react";
+import "./PrecipitationChart.css";
+import AnnualPrecipitationPlot from "./AnnualPrecipitationPlot";
+
+
 
 type AnnualRecord = {
   year: number;
@@ -66,6 +70,9 @@ export default function PrecipitationChart() {
         Série histórica regional de 2001 a 2024,
         expressa em milímetros por ano.
       </p>
+
+<AnnualPrecipitationPlot records={records} />
+
 
       <div style={{ overflowX: "auto" }}>
         <table>
