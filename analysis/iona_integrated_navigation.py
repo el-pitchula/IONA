@@ -1,4 +1,5 @@
-﻿import csv
+﻿
+import csv
 from pathlib import Path
 
 import numpy as np
@@ -43,8 +44,7 @@ mapping_ratio = (
 )
 MAPPING = 1.0 / np.sqrt(1.0 - mapping_ratio**2)
 
-# Linearized pseudorange observation matrix:
-# unknowns = east position error, north position error, clock error
+# Linearized pseudorange observation matrix
 H_GNSS = np.column_stack((
     -np.cos(ELEVATION) * np.sin(AZIMUTH),
     -np.cos(ELEVATION) * np.cos(AZIMUTH),
@@ -132,7 +132,6 @@ def simulate_gnss(true_position, vtec_series):
     for j, t in enumerate(GNSS_TIMES):
         vtec = max(float(vtec_series[j]), 0.1)
 
-        # Small independent satellite-to-satellite TEC variation.
         satellite_vtec = vtec * (
             1 + rng.normal(0, 0.04, len(AZIMUTH))
         )
@@ -146,7 +145,6 @@ def simulate_gnss(true_position, vtec_series):
         noise_l1 = rng.normal(0, CODE_NOISE, len(AZIMUTH))
         noise_l2 = rng.normal(0, CODE_NOISE, len(AZIMUTH))
 
-        # Single-frequency L1 observations.
         pseudorange_l1_error = delay_l1 + noise_l1
 
         # Idealized correction: exact simulated TEC is known.
@@ -154,7 +152,6 @@ def simulate_gnss(true_position, vtec_series):
             pseudorange_l1_error - delay_l1
         )
 
-        # Dual-frequency first-order ionosphere-free combination.
         pseudorange_l2_error = delay_l2 + noise_l2
 
         pseudorange_if_error = (
@@ -162,7 +159,6 @@ def simulate_gnss(true_position, vtec_series):
             + A2 * pseudorange_l2_error
         )
 
-        # Solve east, north and receiver clock error.
         solution_l1 = np.linalg.lstsq(
             H_GNSS, pseudorange_l1_error, rcond=None
         )[0]
@@ -189,12 +185,11 @@ def simulate_gnss(true_position, vtec_series):
 
 
 def run_ekf(gnss_fixes, true_acceleration, measurement_covariance):
-    """2D constant-velocity EKF with IMU acceleration input."""
+    """2D constant-velocity Kalman filter with IMU acceleration input."""
 
     state = np.zeros(4)
     covariance = np.diag([10.0, 10.0, 4.0, 4.0])
 
-    # Initialize position from the first GNSS fix.
     state[:2] = gnss_fixes[0]
 
     F = np.array([
@@ -250,7 +245,6 @@ def run_ekf(gnss_fixes, true_acceleration, measurement_covariance):
 
                 state = state + gain @ innovation
 
-                # Joseph form for numerical stability.
                 identity = np.eye(4)
                 covariance = (
                     (identity - gain @ H)
@@ -269,6 +263,7 @@ def hold_last_gnss(fixes):
 
     output = np.zeros((N, 2))
     last_fix = fixes[0]
+
     lookup = {
         int(index): row
         for row, index in enumerate(GNSS_INDICES)
@@ -325,10 +320,14 @@ def run_scenario(name, true_position, true_acceleration):
     )
 
     ekf_l1 = run_ekf(fixes_l1, true_acceleration, R_L1)
+
     ekf_corrected = run_ekf(
         fixes_corrected, true_acceleration, R_L1
     )
-    ekf_if = run_ekf(fixes_if, true_acceleration, R_IF)
+
+    ekf_if = run_ekf(
+        fixes_if, true_acceleration, R_IF
+    )
 
     gnss_only = hold_last_gnss(fixes_l1)
 
@@ -354,17 +353,20 @@ def run_scenario(name, true_position, true_acceleration):
     print("\n" + "=" * 94)
     print(f"SCENARIO: {name.upper()} | VTEC SYNTHETIC")
     print("=" * 94)
+
     print(
         f"{'Method':34s} | "
         f"{'Full RMSE (m)':>14s} | "
         f"{'Outage RMSE (m)':>16s}"
     )
+
     print("-" * 94)
 
     for method, estimate in estimates.items():
         full_error = rmse(
             estimate, true_position, np.ones(N, dtype=bool)
         )
+
         outage_error = rmse(
             estimate, true_position, outage_time_mask
         )
@@ -381,6 +383,86 @@ def run_scenario(name, true_position, true_acceleration):
             "full_rmse_m": full_error,
             "outage_rmse_m": outage_error
         })
+
+    # ========================================================
+    # EXPORT FULL-RESOLUTION MISSION TIME SERIES
+    # Only the disturbed scenario is exported.
+    # ========================================================
+
+    if name == "disturbed":
+
+        gnss_east = np.full(N, np.nan)
+        gnss_north = np.full(N, np.nan)
+        gnss_available = np.zeros(N, dtype=int)
+
+        for j, index in enumerate(GNSS_INDICES):
+            if not OUTAGE_MASK[j]:
+                gnss_east[index] = fixes_l1[j, 0]
+                gnss_north[index] = fixes_l1[j, 1]
+                gnss_available[index] = 1
+
+        imu_estimate = estimates["IMU only"]
+        ekf_l1_estimate = estimates["EKF L1"]
+
+        ekf_corrected_estimate = estimates[
+            "EKF L1 ideal TEC correction"
+        ]
+
+        ekf_dual_estimate = estimates[
+            "EKF dual-frequency L1+L2"
+        ]
+
+        timeseries_path = OUTPUT / "mission_timeseries.csv"
+
+        fieldnames = [
+            "time_s",
+            "true_east_m",
+            "true_north_m",
+            "gnss_east_m",
+            "gnss_north_m",
+            "imu_east_m",
+            "imu_north_m",
+            "ekf_l1_east_m",
+            "ekf_l1_north_m",
+            "ekf_corrected_east_m",
+            "ekf_corrected_north_m",
+            "ekf_dual_east_m",
+            "ekf_dual_north_m",
+            "gnss_available"
+        ]
+
+        with timeseries_path.open(
+            "w", newline="", encoding="utf-8"
+        ) as f:
+
+            writer = csv.DictWriter(
+                f, fieldnames=fieldnames
+            )
+
+            writer.writeheader()
+
+            for k in range(N):
+                writer.writerow({
+                    "time_s": TIME[k],
+                    "true_east_m": true_position[k, 0],
+                    "true_north_m": true_position[k, 1],
+                    "gnss_east_m": gnss_east[k],
+                    "gnss_north_m": gnss_north[k],
+                    "imu_east_m": imu_estimate[k, 0],
+                    "imu_north_m": imu_estimate[k, 1],
+                    "ekf_l1_east_m": ekf_l1_estimate[k, 0],
+                    "ekf_l1_north_m": ekf_l1_estimate[k, 1],
+                    "ekf_corrected_east_m": ekf_corrected_estimate[k, 0],
+                    "ekf_corrected_north_m": ekf_corrected_estimate[k, 1],
+                    "ekf_dual_east_m": ekf_dual_estimate[k, 0],
+                    "ekf_dual_north_m": ekf_dual_estimate[k, 1],
+                    "gnss_available": gnss_available[k]
+                })
+
+        print(
+            f"\nMission time series generated: "
+            f"{timeseries_path.resolve()}"
+        )
 
     return rows, estimates, vtec
 
@@ -407,10 +489,14 @@ def main():
 
     csv_path = OUTPUT / "integrated_navigation_results.csv"
 
-    with csv_path.open("w", newline="", encoding="utf-8") as f:
+    with csv_path.open(
+        "w", newline="", encoding="utf-8"
+    ) as f:
+
         writer = csv.DictWriter(
             f, fieldnames=list(all_rows[0].keys())
         )
+
         writer.writeheader()
         writer.writerows(all_rows)
 
@@ -418,8 +504,10 @@ def main():
     fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 
     axes[0].plot(
-        true_position[:, 0], true_position[:, 1],
-        label="Reference trajectory", linewidth=2
+        true_position[:, 0],
+        true_position[:, 1],
+        label="Reference trajectory",
+        linewidth=2
     )
 
     for method in [
@@ -428,41 +516,69 @@ def main():
         "EKF L1 ideal TEC correction",
         "EKF dual-frequency L1+L2"
     ]:
+
         estimate = disturbed_estimates[method]
+
         axes[0].plot(
-            estimate[:, 0], estimate[:, 1],
-            label=method, alpha=0.8
+            estimate[:, 0],
+            estimate[:, 1],
+            label=method,
+            alpha=0.8
         )
 
     axes[0].axvline(
-        x=true_position[np.argmin(abs(TIME - OUTAGE_START)), 0],
-        linestyle=":", alpha=0.5
+        x=true_position[
+            np.argmin(abs(TIME - OUTAGE_START)), 0
+        ],
+        linestyle=":",
+        alpha=0.5
     )
-    axes[0].set_title("Navigation estimates | disturbed TEC")
+
+    axes[0].set_title(
+        "Navigation estimates | disturbed TEC"
+    )
+
     axes[0].set_xlabel("East position (m)")
     axes[0].set_ylabel("North position (m)")
     axes[0].grid(True, alpha=0.3)
     axes[0].legend(fontsize=8)
 
     axes[1].plot(
-        GNSS_TIMES, disturbed_vtec,
+        GNSS_TIMES,
+        disturbed_vtec,
         label="Synthetic VTEC"
     )
+
     axes[1].axvspan(
-        OUTAGE_START, OUTAGE_END,
-        alpha=0.2, label="Independent GNSS outage"
+        OUTAGE_START,
+        OUTAGE_END,
+        alpha=0.2,
+        label="Independent GNSS outage"
     )
-    axes[1].set_title("Ionospheric scenario and GNSS outage")
+
+    axes[1].set_title(
+        "Ionospheric scenario and GNSS outage"
+    )
+
     axes[1].set_xlabel("Mission time (s)")
     axes[1].set_ylabel("VTEC (TECU)")
     axes[1].grid(True, alpha=0.3)
     axes[1].legend()
 
-    fig.suptitle("IONA | Integrated GNSS + IMU + Ionosphere")
+    fig.suptitle(
+        "IONA | Integrated GNSS + IMU + Ionosphere"
+    )
+
     fig.tight_layout()
 
     figure_path = OUTPUT / "integrated_navigation.png"
-    fig.savefig(figure_path, dpi=180, bbox_inches="tight")
+
+    fig.savefig(
+        figure_path,
+        dpi=180,
+        bbox_inches="tight"
+    )
+
     plt.close(fig)
 
     print("\nFiles generated:")
