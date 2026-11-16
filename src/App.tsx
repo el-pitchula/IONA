@@ -1,4 +1,4 @@
-
+﻿
 import { useEffect, useMemo, useState } from "react";
 import "./App.css";
 
@@ -30,21 +30,21 @@ const SOLUTIONS: {
 }[] = [
   {
     id: "dual",
-    label: "Kalman · L1 + L2",
+    label: "Kalman Â· L1 + L2",
     description: "Dual-frequency GNSS",
     east: "ekf_dual_east_m",
     north: "ekf_dual_north_m",
   },
   {
     id: "l1",
-    label: "Kalman · L1",
+    label: "Kalman Â· L1",
     description: "Single-frequency GNSS",
     east: "ekf_l1_east_m",
     north: "ekf_l1_north_m",
   },
   {
     id: "tec",
-    label: "Kalman · ideal TEC",
+    label: "Kalman Â· ideal TEC",
     description: "Idealized ionospheric correction",
     east: "ekf_corrected_east_m",
     north: "ekf_corrected_north_m",
@@ -81,7 +81,7 @@ function parseCSV(text: string): Sample[] {
 }
 
 function formatMeters(value: number): string {
-  return Number.isFinite(value) ? `${value.toFixed(2)} m` : "—";
+  return Number.isFinite(value) ? `${value.toFixed(2)} m` : "â€”";
 }
 
 function App() {
@@ -284,15 +284,7 @@ function App() {
           currentSample.true_north_m,
       )
     : NaN;
-
-  const currentSpeed = currentSample
-    ? Math.hypot(
-        currentSample.imu_east_m - currentSample.true_east_m,
-        currentSample.imu_north_m - currentSample.true_north_m,
-      )
-    : NaN;
-
-  const handlePlay = () => {
+const handlePlay = () => {
     if (sampleIndex >= samples.length - 1) setSampleIndex(0);
     setPlaying((value) => !value);
   };
@@ -334,7 +326,7 @@ function App() {
           <div className="mission-info">
             <span className="section-kicker">MISSION PROFILE</span>
             <strong>2D Integrated Navigation Test</strong>
-            <span className="muted">Synthetic local trajectory · 120 seconds</span>
+            <span className="muted">Synthetic local trajectory Â· 120 seconds</span>
           </div>
           <div className="mission-stat">
             <span>DURATION</span>
@@ -354,7 +346,7 @@ function App() {
           </div>
         </section>
 
-        {loading && <div className="notice">Loading mission telemetry…</div>}
+        {loading && <div className="notice">Loading mission telemetryâ€¦</div>}
 
         {loadError && (
           <div className="notice error">
@@ -480,7 +472,7 @@ function App() {
                     <strong>{formatMeters(metrics.full)}</strong>
                   </div>
                   <div className="metric-block highlight">
-                    <span>OUTAGE RMSE · 45–75 SEC</span>
+                    <span>OUTAGE RMSE Â· 45â€“75 SEC</span>
                     <strong>{formatMeters(metrics.outage)}</strong>
                   </div>
                   <div className="metric-footnote">
@@ -532,13 +524,13 @@ function App() {
 
               <div className="timeline-labels">
                 <span>00:00</span>
-                <span className="outage-label">GNSS OUTAGE · 00:45–01:15</span>
+                <span className="outage-label">GNSS OUTAGE Â· 00:45â€“01:15</span>
                 <span>02:00</span>
               </div>
 
               <div className="playback-controls">
                 <button className="play-button" onClick={handlePlay}>
-                  {playing ? "Ⅱ PAUSE" : "▶ PLAY MISSION"}
+                  {playing ? "â…¡ PAUSE" : "â–¶ PLAY MISSION"}
                 </button>
                 <button
                   className="reset-button"
@@ -555,11 +547,11 @@ function App() {
                   <strong>{formatMeters(currentError)}</strong>
                 </div>
                 <div className="current-readout">
-                  <span>ESTIMATED POSITION · EAST</span>
+                  <span>ESTIMATED POSITION Â· EAST</span>
                   <strong>{formatMeters(currentSample[selectedSolution.east] as number)}</strong>
                 </div>
                 <div className="current-readout">
-                  <span>ESTIMATED POSITION · NORTH</span>
+                  <span>ESTIMATED POSITION Â· NORTH</span>
                   <strong>{formatMeters(currentSample[selectedSolution.north] as number)}</strong>
                 </div>
               </div>
@@ -622,8 +614,8 @@ function App() {
 
               <div className="error-legend">
                 <span><i /> Position error</span>
-                <span className="outage-key">GNSS outage · 45–75 s</span>
-                <span>Vertical marker · selected time</span>
+                <span className="outage-key">GNSS outage Â· 45â€“75 s</span>
+                <span>Vertical marker Â· selected time</span>
               </div>
             </section>
 
@@ -643,13 +635,13 @@ function App() {
                     <strong>GNSS</strong>
                     <small>Position fixes</small>
                   </div>
-                  <div className="process-arrow">→</div>
+                  <div className="process-arrow">â†’</div>
                   <div className="process-node">
                     <span>02</span>
                     <strong>IMU</strong>
                     <small>Motion propagation</small>
                   </div>
-                  <div className="process-arrow">→</div>
+                  <div className="process-arrow">â†’</div>
                   <div className="process-node">
                     <span>03</span>
                     <strong>KALMAN</strong>
@@ -677,8 +669,8 @@ function App() {
         )}
 
         <footer className="footer">
-          <div>IONA <span>·</span> INTELLIGENT NAVIGATION ARCHITECTURE</div>
-          <div>RESEARCH PROTOTYPE · SYNTHETIC DATA · 2026</div>
+          <div>IONA <span>Â·</span> INTELLIGENT NAVIGATION ARCHITECTURE</div>
+          <div>RESEARCH PROTOTYPE Â· SYNTHETIC DATA Â· 2026</div>
         </footer>
       </main>
     </div>
@@ -686,3 +678,4 @@ function App() {
 }
 
 export default App;
+
